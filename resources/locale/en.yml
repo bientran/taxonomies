@@ -1,0 +1,64 @@
+fof-taxonomies:
+    admin:
+        menu:
+            title: Taxonomies
+            description: Create custom taxonomies and terms.
+        page:
+            title: Taxonomies
+            create:
+                taxonomy: Create taxonomy
+                term: Create term
+        edit-taxonomy:
+            title:
+                new: Create Taxonomy
+                edit: Edit Taxonomy
+            field:
+                name: Name
+                slug: Slug
+                description: Description
+                color: Color
+                icon: Icon
+                showLabel: Show taxonomy label together with term
+                showFilter: Show filter on homepage
+                allowCustomValues: Allow custom values
+                minTerms: Minimum number of terms
+                maxTerms: Maximum number of terms
+            delete: Delete
+            deleteConfirmation: >
+                Do you really want to delete the taxonomy {name}?
+                All terms under that taxonomy will be deleted.
+                Discussions using the taxonomy will NOT be deleted.
+            submit:
+                new: Create
+                edit: Save
+        edit-term:
+            title:
+                new: Create Term
+                edit: Edit Term
+            field:
+                name: Name
+                slug: Slug
+                description: Description
+                color: Color
+                icon: Icon
+            delete: Delete
+            deleteConfirmation: >
+                Do you really want to delete the term {name}?
+                Discussions using the term will NOT be deleted.
+            submit:
+                new: Create
+                edit: Save
+
+    forum:
+        composer:
+            choose: Choose {taxonomy}
+
+        modal:
+            title:
+                new: Choose {taxonomy} for your discussion
+                edit: Edit {taxonomy} for {title}
+            placeholder: Choose a term|Choose {remaining} terms
+            custom: Use {value}
+
+        discussion:
+            edit: Edit {taxonomy}
