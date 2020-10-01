@@ -15,7 +15,7 @@ class TaxonomyGambit extends AbstractRegexGambit
     protected function conditions(AbstractSearch $search, array $matches, $negate)
     {
         $taxonomySlug = trim($matches[1], '"');
-        $termSlugs = explode(',', trim($matches[1], '"'));
+        $termSlugs = explode(',', trim($matches[2], '"'));
 
         $termIdsMap = Term::query()
             ->whereIn('slug', $termSlugs)
