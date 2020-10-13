@@ -1,3 +1,5 @@
+import sortable from 'html5sortable/dist/html5sortable.es.js';
+
 import app from 'flarum/app';
 import Page from 'flarum/components/Page';
 import Button from 'flarum/components/Button';
@@ -29,8 +31,36 @@ export default class TaxonomiesPage extends Page {
         return m('.TaxonomiesPage', m('.container', [
             this.taxonomies === null ? LoadingIndicator.component({}) : [
                 m('h2', app.translator.trans('fof-taxonomies.admin.page.title')),
-                m('.TaxonomyTabs', [
-                    sortTaxonomies(this.taxonomies).map((taxonomy, index) => m('.TaxonomyTab', {
+                m('.TaxonomyTabs', {
+                    config: element => {
+                        sortable(element, {
+                            selector: '.js-sort-taxonomy-item',
+                        })[0].addEventListener('sortupdate', event => {
+                            const order = this.$('.js-sort-taxonomy-item')
+                                .map(function () {
+                                    return $(this).data('id');
+                                })
+                                .get();
+
+                            app.request({
+                                method: 'POST',
+                                url: app.forum.attribute('apiUrl') + '/fof-taxonomies/order',
+                                data: {
+                                    order,
+                                },
+                            }).then(result => {
+                                this.taxonomies = app.store.pushPayload(result);
+                                this.tabIndex = 0;
+                            }).catch(e => {
+                                m.redraw.strategy('all');
+                                m.redraw();
+                                throw e;
+                            });
+                        });
+                    },
+                }, [
+                    this.taxonomies.map((taxonomy, index) => m('.TaxonomyTab.js-sort-taxonomy-item', {
+                        'data-id': taxonomy.id(),
                         key: taxonomy.id(),
                         onclick: () => {
                             this.tabIndex = index;

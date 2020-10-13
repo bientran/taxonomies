@@ -22,7 +22,9 @@ class TermRepository
 
     protected function query(): Builder
     {
-        return $this->term->newQuery()->orderBy('order', 'desc');
+        return $this->term->newQuery()
+            ->orderBy('order')
+            ->orderBy('name');
     }
 
     /**
@@ -74,13 +76,17 @@ class TermRepository
         $term->delete();
     }
 
-    public function sorting(array $sorting)
+    public function sorting(Taxonomy $taxonomy, array $sorting)
     {
-        foreach ($sorting as $i => $fieldId) {
+        $taxonomy->terms()->update([
+            'order' => null,
+        ]);
+
+        foreach ($sorting as $index => $termId) {
             $this->term
                 ->newQuery()
-                ->where('id', $fieldId)
-                ->update(['sort' => $i]);
+                ->where('id', $termId)
+                ->update(['order' => $index + 1]); // +1 to avoid zero which has same priority as null in javascript
         }
     }
 }

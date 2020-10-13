@@ -3,7 +3,6 @@ import Component from 'flarum/Component';
 import Button from 'flarum/components/Button';
 import Dropdown from 'flarum/components/Dropdown';
 import LoadingIndicator from 'flarum/components/LoadingIndicator';
-import sortTerms from '../../common/utils/sortTerms';
 
 /* global m */
 
@@ -28,7 +27,7 @@ export default class TaxonomyDropdown extends Component {
                     method: 'GET',
                     url: app.forum.attribute('apiUrl') + taxonomy.apiEndpoint() + '/terms',
                 }).then(result => {
-                    this.terms = sortTerms(app.store.pushPayload(result));
+                    this.terms = app.store.pushPayload(result);
 
                     this.terms.forEach(term => {
                         term.pushData({

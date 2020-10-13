@@ -10,7 +10,6 @@ import KeyboardNavigatable from 'flarum/utils/KeyboardNavigatable';
 
 import termLabel from '../../common/helpers/termLabel';
 import taxonomyIcon from '../../common/helpers/taxonomyIcon';
-import sortTerms from '../../common/utils/sortTerms';
 import termToIdentifier from '../../common/utils/termToIdentifier';
 
 /* global m */
@@ -65,7 +64,7 @@ export default class ChooseTaxonomyTermsModal extends Modal {
             method: 'GET',
             url: app.forum.attribute('apiUrl') + this.props.taxonomy.apiEndpoint() + '/terms',
         }).then(result => {
-            this.availableTerms = sortTerms(app.store.pushPayload(result));
+            this.availableTerms = app.store.pushPayload(result);
 
             m.redraw();
         });

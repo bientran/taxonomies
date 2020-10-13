@@ -9,7 +9,7 @@ class OrderValidator extends AbstractValidator
     protected function getRules()
     {
         return [
-            'sort' => 'required|array',
+            'order' => 'nullable|array',
         ];
     }
 }

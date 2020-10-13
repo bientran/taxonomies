@@ -7,7 +7,6 @@ import LoadingIndicator from 'flarum/components/LoadingIndicator';
 import sortTerms from '../../common/utils/sortTerms';
 import EditTermModal from './EditTermModal';
 import taxonomyIcon from '../../common/helpers/taxonomyIcon';
-import sortTaxonomies from '../../common/utils/sortTaxonomies';
 
 /* global m */
 
@@ -29,7 +28,7 @@ export default class TaxonomyTermsList extends Component {
             this.terms === null ? LoadingIndicator.component({}) : m('ol.TaxonomyTermList', {
                 config: element => {
                     sortable(element)[0].addEventListener('sortupdate', event => {
-                        const sorting = this.$('.js-field-data')
+                        const order = this.$('.js-sort-term-item')
                             .map(function () {
                                 return $(this).data('id');
                             })
@@ -37,18 +36,22 @@ export default class TaxonomyTermsList extends Component {
 
                         app.request({
                             method: 'POST',
-                            url: app.forum.attribute('apiUrl') + '/fof-taxonomy-terms/order',
+                            url: app.forum.attribute('apiUrl') + this.props.taxonomy.apiEndpoint() + '/terms/order',
                             data: {
-                                sort: sorting,
+                                order,
                             },
                         }).then(result => {
-                            // Update sort attributes
+                            // If there's no error, we save the new order so it can be used in case a redraw is triggered
                             app.store.pushPayload(result);
+                        }).catch(e => {
+                            // If there's an error, we force a full redraw to make sure the user sees what is saved
+                            m.redraw.strategy('all');
                             m.redraw();
+                            throw e;
                         });
                     });
                 },
-            }, sortTerms(this.terms).map((term, index) => m('li.TaxonomyTermListItem', {
+            }, this.terms.map((term, index) => m('li.TaxonomyTermListItem.js-sort-term-item', {
                 'data-id': term.id(),
                 style: {
                     color: term.color(),
@@ -80,6 +83,25 @@ export default class TaxonomyTermsList extends Component {
                     }));
                 },
             }, app.translator.trans('fof-taxonomies.admin.page.create.term')),
+            ' ',
+            Button.component({
+                className: 'Button',
+                onclick: () => {
+                    app.request({
+                        method: 'POST',
+                        url: app.forum.attribute('apiUrl') + this.props.taxonomy.apiEndpoint() + '/terms/order',
+                        data: {
+                            order: [],
+                        },
+                    }).then(result => {
+                        app.store.pushPayload(result);
+                    }).catch(e => {
+                        m.redraw.strategy('all');
+                        m.redraw();
+                        throw e;
+                    });
+                },
+            }, app.translator.trans('fof-taxonomies.admin.page.reset-term-order')),
         ]);
     }
 }

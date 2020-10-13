@@ -8,6 +8,7 @@ fof-taxonomies:
             create:
                 taxonomy: Create taxonomy
                 term: Create term
+            reset-term-order: Reset terms list to alphabetical order
         edit-taxonomy:
             title:
                 new: Create Taxonomy

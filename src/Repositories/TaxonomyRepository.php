@@ -22,7 +22,9 @@ class TaxonomyRepository
 
     protected function query(): Builder
     {
-        return $this->taxonomy->newQuery()->orderBy('order', 'desc');
+        return $this->taxonomy->newQuery()
+            ->orderBy('order')
+            ->orderBy('name');
     }
 
     /**
@@ -68,13 +70,17 @@ class TaxonomyRepository
         $taxonomy->delete();
     }
 
-    public function sorting(array $sorting)
+    public function sorting(array $order)
     {
-        foreach ($sorting as $i => $fieldId) {
+        $this->taxonomy->newQuery()->update([
+            'order' => null,
+        ]);
+
+        foreach ($order as $index => $taxonomyId) {
             $this->taxonomy
                 ->newQuery()
-                ->where('id', $fieldId)
-                ->update(['sort' => $i]);
+                ->where('id', $taxonomyId)
+                ->update(['order' => $index + 1]);
         }
     }
 }

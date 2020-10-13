@@ -24,7 +24,7 @@ return [
         ->delete('/fof-taxonomies/{id:[0-9]+}', 'fof-taxonomies.taxonomies.delete', Controllers\TaxonomyDeleteController::class)
         ->get('/fof-taxonomies/{id:[0-9]+}/terms', 'fof-taxonomies.terms.index', Controllers\TermIndexController::class)
         ->post('/fof-taxonomies/{id:[0-9]+}/terms', 'fof-taxonomies.terms.store', Controllers\TermStoreController::class)
-        ->post('/fof-taxonomy-terms/order', 'fof-taxonomies.terms.order', Controllers\TermOrderController::class)
+        ->post('/fof-taxonomies/{id:[0-9]+}/terms/order', 'fof-taxonomies.terms.order', Controllers\TermOrderController::class)
         ->patch('/fof-taxonomy-terms/{id:[0-9]+}', 'fof-taxonomies.terms.update', Controllers\TermUpdateController::class)
         ->delete('/fof-taxonomy-terms/{id:[0-9]+}', 'fof-taxonomies.terms.delete', Controllers\TermDeleteController::class),
 
