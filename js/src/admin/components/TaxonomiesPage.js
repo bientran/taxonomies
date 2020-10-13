@@ -31,6 +31,7 @@ export default class TaxonomiesPage extends Page {
                 m('h2', app.translator.trans('fof-taxonomies.admin.page.title')),
                 m('.TaxonomyTabs', [
                     sortTaxonomies(this.taxonomies).map((taxonomy, index) => m('.TaxonomyTab', {
+                        key: taxonomy.id(),
                         onclick: () => {
                             this.tabIndex = index;
                         },
@@ -58,6 +59,7 @@ export default class TaxonomiesPage extends Page {
                         }),
                     ])),
                     Button.component({
+                        key: 'new',
                         className: 'TaxonomyTab',
                         icon: 'fas fa-plus',
                         onclick: () => {

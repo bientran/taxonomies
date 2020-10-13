@@ -2,6 +2,7 @@
 
 namespace FoF\Taxonomies\Extenders;
 
+use Flarum\Discussion\Discussion;
 use Flarum\Discussion\Event\Saving;
 use Flarum\Extend\ExtenderInterface;
 use Flarum\Extension\Extension;
@@ -96,8 +97,21 @@ class SaveDiscussion implements ExtenderInterface
 
             $newTermIds = $terms->pluck('id')->all();
 
-            // TODO: check if a term already exists with that exact name
             foreach ($customTerms as $customTerm) {
+                /**
+                 * @var $existingTermWithSameName Term
+                 */
+                $existingTermWithSameName = $taxonomy->terms()->where('name', $customTerm)->first();
+
+                // It's possible somebody else created a term with the same name in the meantime
+                // If that's the case, we re-use the existing term
+                // This also prevents malicious creation of the exact same term multiple times
+                if ($existingTermWithSameName) {
+                    $newTermIds[] = $existingTermWithSameName->id;
+
+                    continue;
+                }
+
                 $slug = null;
 
                 switch ($taxonomy->custom_value_slugger) {
@@ -136,8 +150,20 @@ class SaveDiscussion implements ExtenderInterface
                 $newTermIds[] = $term->id;
             }
 
-            $discussion->afterSave(function ($discussion) use ($newTermIds) {
-                $discussion->taxonomyTerms()->sync($newTermIds);
+            $discussion->afterSave(function (Discussion $discussion) use ($taxonomy, $newTermIds) {
+                // Implementation similar to $relationship->sync(), but taxonomy-aware
+
+                $currentTermIds = $discussion->taxonomyTerms()->where('taxonomy_id', $taxonomy->id)->pluck('id')->all();
+
+                $detach = array_diff($currentTermIds, $newTermIds);
+                if (count($detach) > 0) {
+                    $discussion->taxonomyTerms()->detach($detach);
+                }
+
+                $attach = array_diff($newTermIds, $currentTermIds);
+                if (count($attach) > 0) {
+                    $discussion->taxonomyTerms()->attach($attach);
+                }
             });
         }
     }

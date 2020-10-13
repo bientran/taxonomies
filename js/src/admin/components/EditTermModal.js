@@ -1,4 +1,5 @@
 import app from 'flarum/app';
+import extractText from 'flarum/utils/extractText';
 import {slug} from 'flarum/utils/string';
 import AbstractEditModal from './AbstractEditModal';
 
@@ -87,9 +88,9 @@ export default class EditTermModal extends AbstractEditModal {
     }
 
     ondelete() {
-        if (!app.translator.trans(this.translationPrefix() + 'deleteConfirmation', {
-            name: m('em', this.props.term.name()),
-        })) {
+        if (!confirm(extractText(app.translator.trans(this.translationPrefix() + 'deleteConfirmation', {
+            name: this.props.term.name(),
+        })))) {
             return;
         }
 
