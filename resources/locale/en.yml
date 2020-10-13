@@ -18,6 +18,8 @@ fof-taxonomies:
                 description: Description
                 color: Color
                 icon: Icon
+                tagBased: Use native Flarum Tags instead of Terms
+                manualTermsOrder: Manual terms order instead of alphabetical
                 showLabel: Show taxonomy label together with term
                 showFilter: Show filter on homepage
                 allowCustomValues: Allow custom values

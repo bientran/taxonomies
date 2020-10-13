@@ -8,6 +8,8 @@ export default class Taxonomy extends Model {
     color = Model.attribute('color');
     icon = Model.attribute('icon');
     order = Model.attribute('order');
+    tagBased = Model.attribute('tagBased');
+    manualTermsOrder = Model.attribute('manualTermsOrder');
     showLabel = Model.attribute('showLabel');
     showFilter = Model.attribute('showFilter');
     allowCustomValues = Model.attribute('allowCustomValues');

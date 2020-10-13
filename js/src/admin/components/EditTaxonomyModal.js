@@ -17,6 +17,8 @@ export default class EditTaxonomyModal extends AbstractEditModal {
         this.description = taxonomy ? taxonomy.description() : '';
         this.color = taxonomy ? taxonomy.color() : '';
         this.icon = taxonomy ? taxonomy.icon() : '';
+        this.tagBased = taxonomy ? taxonomy.tagBased() : false;
+        this.manualTermsOrder = taxonomy ? taxonomy.manualTermsOrder() : false;
         this.showLabel = taxonomy ? taxonomy.showLabel() : false;
         this.showFilter = taxonomy ? taxonomy.showFilter() : false;
         this.allowCustomValues = taxonomy ? taxonomy.allowCustomValues() : false;
@@ -95,6 +97,35 @@ export default class EditTaxonomyModal extends AbstractEditModal {
                 m('label', [
                     m('input', {
                         type: 'checkbox',
+                        checked: this.tagBased,
+                        onchange: () => {
+                            this.tagBased = !this.tagBased;
+                            this.dirty = true;
+                        },
+                    }),
+                    ' ',
+                    app.translator.trans(this.translationPrefix() + 'field.tagBased'),
+                ]),
+            ]),
+            m('.Form-group', [
+                m('label', [
+                    m('input', {
+                        type: 'checkbox',
+                        checked: this.tagBased || this.manualTermsOrder,
+                        onchange: () => {
+                            this.manualTermsOrder = !this.manualTermsOrder;
+                            this.dirty = true;
+                        },
+                        disabled: this.tagBased,
+                    }),
+                    ' ',
+                    app.translator.trans(this.translationPrefix() + 'field.manualTermsOrder'),
+                ]),
+            ]),
+            m('.Form-group', [
+                m('label', [
+                    m('input', {
+                        type: 'checkbox',
                         checked: this.showLabel,
                         onchange: () => {
                             this.showLabel = !this.showLabel;
@@ -109,11 +140,12 @@ export default class EditTaxonomyModal extends AbstractEditModal {
                 m('label', [
                     m('input', {
                         type: 'checkbox',
-                        checked: this.showFilter,
+                        checked: !this.tagBased && this.showFilter,
                         onchange: () => {
                             this.showFilter = !this.showFilter;
                             this.dirty = true;
                         },
+                        disabled: this.tagBased,
                     }),
                     ' ',
                     app.translator.trans(this.translationPrefix() + 'field.showFilter'),
@@ -123,11 +155,12 @@ export default class EditTaxonomyModal extends AbstractEditModal {
                 m('label', [
                     m('input', {
                         type: 'checkbox',
-                        checked: this.allowCustomValues,
+                        checked: !this.tagBased && this.allowCustomValues,
                         onchange: () => {
                             this.allowCustomValues = !this.allowCustomValues;
                             this.dirty = true;
                         },
+                        disabled: this.tagBased,
                     }),
                     ' ',
                     app.translator.trans(this.translationPrefix() + 'field.allowCustomValues'),
@@ -147,7 +180,7 @@ export default class EditTaxonomyModal extends AbstractEditModal {
                         this.customValueValidation = value === 'regex' ? '//' : value;
                         this.dirty = true;
                     },
-                    disabled: !this.allowCustomValues,
+                    disabled: this.tagBased || !this.allowCustomValues,
                 }),
                 this.customValueValidation.indexOf('/') === 0 ? m('.TaxonomyRegexInput', [
                     m('span', '/'),
@@ -158,7 +191,7 @@ export default class EditTaxonomyModal extends AbstractEditModal {
                             this.customValueValidation = '/' + event.target.value + '/' + this.customValueValidation.split('/')[2];
                             this.dirty = true;
                         },
-                        disabled: !this.allowCustomValues,
+                        disabled: this.tagBased || !this.allowCustomValues,
                     }),
                     m('span', '/'),
                     m('input.FormControl', {
@@ -168,7 +201,7 @@ export default class EditTaxonomyModal extends AbstractEditModal {
                             this.customValueValidation = '/' + this.customValueValidation.split('/')[1] + '/' + event.target.value;
                             this.dirty = true;
                         },
-                        disabled: !this.allowCustomValues,
+                        disabled: this.tagBased || !this.allowCustomValues,
                     }),
                 ]) : null,
             ]),
@@ -185,7 +218,7 @@ export default class EditTaxonomyModal extends AbstractEditModal {
                         this.customValueSlugger = value;
                         this.dirty = true;
                     },
-                    disabled: !this.allowCustomValues,
+                    disabled: this.tagBased || !this.allowCustomValues,
                 }),
             ]),
             m('.Form-group', [
@@ -250,6 +283,8 @@ export default class EditTaxonomyModal extends AbstractEditModal {
             description: this.description,
             color: this.color,
             icon: this.icon,
+            tag_based: this.tagBased,
+            manual_terms_order: this.manualTermsOrder,
             show_label: this.showLabel,
             show_filter: this.showFilter,
             allow_custom_values: this.allowCustomValues,

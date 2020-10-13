@@ -3,6 +3,7 @@
 
 namespace FoF\Taxonomies\Repositories;
 
+use Flarum\Foundation\ValidationException;
 use FoF\Taxonomies\Taxonomy;
 use FoF\Taxonomies\Validators\TaxonomyValidator;
 use Illuminate\Database\Eloquent\Builder;
@@ -58,6 +59,14 @@ class TaxonomyRepository
         $this->validator->assertValid($attributes);
 
         $taxonomy->fill($attributes);
+
+        if ($taxonomy->isDirty('tag_based') && ($taxonomy->terms()->count() + $taxonomy->tags()->count()) > 0) {
+            throw new ValidationException([
+                // TODO: translate
+                'manual_terms_order' => 'You cannot change between tag based and term based when tag or terms already exist under the taxonomy.',
+            ]);
+        }
+
         $taxonomy->save();
 
         return $taxonomy;

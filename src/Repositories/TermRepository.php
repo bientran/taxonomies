@@ -2,6 +2,7 @@
 
 namespace FoF\Taxonomies\Repositories;
 
+use Flarum\Foundation\ValidationException;
 use FoF\Taxonomies\Taxonomy;
 use FoF\Taxonomies\Term;
 use FoF\Taxonomies\Validators\TermValidator;
@@ -47,6 +48,13 @@ class TermRepository
 
     public function store(Taxonomy $taxonomy, array $attributes): Term
     {
+        if ($taxonomy->tag_based) {
+            throw new ValidationException([
+                // TODO: translation
+                'tag_based' => 'This taxonomy is tag-based. Terms cannot be created',
+            ]);
+        }
+
         $this->validator->taxonomyId = $taxonomy->id;
         $this->validator->assertValid($attributes);
 

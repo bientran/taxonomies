@@ -4,7 +4,7 @@ namespace FoF\Taxonomies;
 
 use Carbon\Carbon;
 use Flarum\Database\AbstractModel;
-use Flarum\Database\ScopeVisibilityTrait;
+use Flarum\Tags\Tag;
 
 /**
  * @property int $id
@@ -14,6 +14,8 @@ use Flarum\Database\ScopeVisibilityTrait;
  * @property string $color
  * @property string $icon
  * @property int $order
+ * @property bool $tag_based
+ * @property bool $manual_terms_order
  * @property bool $show_label
  * @property bool $show_filter
  * @property bool $allow_custom_values
@@ -26,8 +28,6 @@ use Flarum\Database\ScopeVisibilityTrait;
  */
 class Taxonomy extends AbstractModel
 {
-    use ScopeVisibilityTrait;
-
     protected $table = 'fof_taxonomies';
 
     public $timestamps = true;
@@ -38,6 +38,8 @@ class Taxonomy extends AbstractModel
         'description',
         'color',
         'icon',
+        'tag_based',
+        'manual_terms_order',
         'show_label',
         'show_filter',
         'allow_custom_values',
@@ -49,6 +51,8 @@ class Taxonomy extends AbstractModel
 
     protected $casts = [
         'order' => 'int',
+        'tag_based' => 'bool',
+        'manual_terms_order' => 'bool',
         'show_label' => 'bool',
         'show_filter' => 'bool',
         'allow_custom_values' => 'bool',
@@ -61,5 +65,10 @@ class Taxonomy extends AbstractModel
     public function terms()
     {
         return $this->hasMany(Term::class);
+    }
+
+    public function tags()
+    {
+        return $this->hasMany(Tag::class, 'fof_taxonomy_id');
     }
 }

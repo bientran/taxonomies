@@ -73,10 +73,13 @@ export default class TaxonomiesPage extends Page {
                     }, app.translator.trans('fof-taxonomies.admin.page.create.taxonomy')),
                 ]),
                 this.tabIndex < this.taxonomies.length ? m('div', m('div', {
-                    key: this.taxonomies[this.tabIndex].id(),
-                }, TaxonomyTermsList.component({
-                    taxonomy: this.taxonomies[this.tabIndex],
-                }))) : null,
+                        key: this.taxonomies[this.tabIndex].id(),
+                    }, this.taxonomies[this.tabIndex].tagBased() ?
+                    m('p', 'This is a tag-based taxonomy. Visit the Tags page to configure children.' /* TODO translate */) :
+                    TaxonomyTermsList.component({
+                        taxonomy: this.taxonomies[this.tabIndex],
+                    })
+                )) : null,
             ],
         ]));
     }

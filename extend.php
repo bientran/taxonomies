@@ -43,6 +43,7 @@ return [
         });
 
         $events->subscribe(Access\DiscussionPolicy::class);
+        $events->subscribe(Access\TagPolicy::class);
         $events->subscribe(Access\TaxonomyPolicy::class);
     },
 ];

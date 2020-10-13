@@ -22,6 +22,8 @@ class TaxonomySerializer extends AbstractSerializer
             'color' => $taxonomy->color,
             'icon' => $taxonomy->icon,
             'order' => $taxonomy->order,
+            'tagBased' => $taxonomy->tag_based,
+            'manualTermsOrder' => $taxonomy->manual_terms_order,
             'showLabel' => $taxonomy->show_label,
             'showFilter' => $taxonomy->show_filter,
             'allowCustomValues' => $taxonomy->allow_custom_values,
