@@ -21,6 +21,8 @@ fof-taxonomies:
                 showLabel: Show taxonomy label together with term
                 showFilter: Show filter on homepage
                 allowCustomValues: Allow custom values
+                customValueValidation: Validation for custom values
+                customValueSlugger: Slugger for custom values
                 minTerms: Minimum number of terms
                 maxTerms: Maximum number of terms
             delete: Delete
@@ -31,6 +33,15 @@ fof-taxonomies:
             submit:
                 new: Create
                 edit: Save
+            validation-options:
+                default: Any text value
+                alpha_num: Alpha-numerical values
+                alpha_dash: Alpha-numerical values and dashes/underscores
+                regex: Regular expression
+            slugger-options:
+                random: Random identifier
+                alpha_dash: ASCII alpha-numerical slugger
+                transliterator: Use FoF Transliterator extension
         edit-term:
             title:
                 new: Create Term

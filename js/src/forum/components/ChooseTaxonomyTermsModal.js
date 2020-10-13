@@ -131,11 +131,27 @@ export default class ChooseTaxonomyTermsModal extends Modal {
                 this.props.taxonomy.allowCustomValues() &&
                 !availableTerms.some(term => term.name().toLowerCase() === filter)
             ) {
-                availableTerms.push(app.store.createRecord('fof-taxonomy-terms', {
-                    attributes: {
-                        name: this.searchFilter,
-                    },
-                }));
+                const validation = this.props.taxonomy.customValueValidation();
+                let regex = null;
+
+                if (validation === 'alpha_num') {
+                    regex = /^[a-z0-9]$/i;
+                } else if (validation === 'alpha_dash') {
+                    regex = /^[a-z0-9_-]$/i;
+                } else if (validation.indexOf('/') === 0) {
+                    const parts = validation.split('/');
+                    if (parts.length === 3) {
+                        regex = new RegExp(parts[1], parts[2]);
+                    }
+                }
+
+                if (!regex || regex.test(this.searchFilter)) {
+                    availableTerms.push(app.store.createRecord('fof-taxonomy-terms', {
+                        attributes: {
+                            name: this.searchFilter,
+                        },
+                    }));
+                }
             }
         }
 
@@ -291,7 +307,12 @@ export default class ChooseTaxonomyTermsModal extends Modal {
                     app.current.stream.update();
                 }
                 m.redraw();
+
+                app.modal.close();
             });
+
+            // Do not run the normal code - it might close the modal even if an error occurred
+            return;
         }
 
         if (this.props.onsubmit) this.props.onsubmit(this.selectedTerms);

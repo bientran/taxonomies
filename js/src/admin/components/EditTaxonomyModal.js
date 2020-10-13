@@ -1,6 +1,7 @@
 import app from 'flarum/app';
 import extractText from 'flarum/utils/extractText';
 import {slug} from 'flarum/utils/string';
+import Select from 'flarum/components/Select';
 import AbstractEditModal from './AbstractEditModal';
 
 /* global m */
@@ -19,6 +20,8 @@ export default class EditTaxonomyModal extends AbstractEditModal {
         this.showLabel = taxonomy ? taxonomy.showLabel() : false;
         this.showFilter = taxonomy ? taxonomy.showFilter() : false;
         this.allowCustomValues = taxonomy ? taxonomy.allowCustomValues() : false;
+        this.customValueValidation = (taxonomy ? taxonomy.customValueValidation() : null) || '';
+        this.customValueSlugger = (taxonomy ? taxonomy.customValueSlugger() : null) || 'random';
         this.minTerms = taxonomy ? taxonomy.minTerms() : '';
         this.maxTerms = taxonomy ? taxonomy.maxTerms() : '';
     }
@@ -131,6 +134,61 @@ export default class EditTaxonomyModal extends AbstractEditModal {
                 ]),
             ]),
             m('.Form-group', [
+                m('label', app.translator.trans(this.translationPrefix() + 'field.customValueValidation')),
+                Select.component({
+                    options: {
+                        '': app.translator.trans(this.translationPrefix() + 'validation-options.default'),
+                        alpha_num: app.translator.trans(this.translationPrefix() + 'validation-options.alpha_num'),
+                        alpha_dash: app.translator.trans(this.translationPrefix() + 'validation-options.alpha_dash'),
+                        regex: app.translator.trans(this.translationPrefix() + 'validation-options.regex'),
+                    },
+                    value: this.customValueValidation.indexOf('/') === 0 ? 'regex' : this.customValueValidation,
+                    onchange: value => {
+                        this.customValueValidation = value === 'regex' ? '//' : value;
+                        this.dirty = true;
+                    },
+                    disabled: !this.allowCustomValues,
+                }),
+                this.customValueValidation.indexOf('/') === 0 ? m('.TaxonomyRegexInput', [
+                    m('span', '/'),
+                    m('input.FormControl', {
+                        type: 'text',
+                        value: this.customValueValidation.split('/')[1],
+                        oninput: event => {
+                            this.customValueValidation = '/' + event.target.value + '/' + this.customValueValidation.split('/')[2];
+                            this.dirty = true;
+                        },
+                        disabled: !this.allowCustomValues,
+                    }),
+                    m('span', '/'),
+                    m('input.FormControl', {
+                        type: 'text',
+                        value: this.customValueValidation.split('/')[2],
+                        oninput: event => {
+                            this.customValueValidation = '/' + this.customValueValidation.split('/')[1] + '/' + event.target.value;
+                            this.dirty = true;
+                        },
+                        disabled: !this.allowCustomValues,
+                    }),
+                ]) : null,
+            ]),
+            m('.Form-group', [
+                m('label', app.translator.trans(this.translationPrefix() + 'field.customValueSlugger')),
+                Select.component({
+                    options: {
+                        random: app.translator.trans(this.translationPrefix() + 'slugger-options.random'),
+                        alpha_dash: app.translator.trans(this.translationPrefix() + 'slugger-options.alpha_dash'),
+                        transliterator: app.translator.trans(this.translationPrefix() + 'slugger-options.transliterator'),
+                    },
+                    value: this.customValueSlugger,
+                    onchange: value => {
+                        this.customValueSlugger = value;
+                        this.dirty = true;
+                    },
+                    disabled: !this.allowCustomValues,
+                }),
+            ]),
+            m('.Form-group', [
                 m('label', app.translator.trans(this.translationPrefix() + 'field.minTerms')),
                 m('input.FormControl', {
                     type: 'number',
@@ -195,6 +253,8 @@ export default class EditTaxonomyModal extends AbstractEditModal {
             show_label: this.showLabel,
             show_filter: this.showFilter,
             allow_custom_values: this.allowCustomValues,
+            custom_value_validation: this.customValueValidation,
+            custom_value_slugger: this.customValueSlugger,
             min_terms: this.minTerms,
             max_terms: this.maxTerms,
         }, {

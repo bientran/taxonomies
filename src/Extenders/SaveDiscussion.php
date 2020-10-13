@@ -124,6 +124,7 @@ class SaveDiscussion implements ExtenderInterface
                         }
                         $slug = Transliterator::transliterate($customTerm);
                         break;
+                    // case random
                     default:
                         $slug = Str::random();
                 }
