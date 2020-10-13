@@ -10,7 +10,7 @@ let taxonomyFilterTerms = [];
 export default function () {
     extend(IndexPage.prototype, 'viewItems', items => {
         sortTaxonomies(app.store.all('fof-taxonomies')).forEach(taxonomy => {
-            if (!taxonomy.showFilter()) {
+            if (!taxonomy.canSearchDiscussions() || !taxonomy.showFilter()) {
                 return;
             }
 
@@ -40,6 +40,10 @@ export default function () {
     });
 
     extend(DiscussionList.prototype, 'requestParams', function (params) {
+        // Include the taxonomies when navigating to the discussion list
+        // Same includes are pre-loaded in DiscussionAttributes.php
+        params.include.push('taxonomyTerms', 'taxonomyTerms.taxonomy');
+
         taxonomyFilterTerms.forEach(term => {
             params.filter.q = (params.filter.q || '') + ' taxonomy:' + term.taxonomy().slug() + ':' + term.slug();
         });

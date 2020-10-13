@@ -16,6 +16,7 @@ export default class Taxonomy extends Model {
     minTerms = Model.attribute('minTerms');
     maxTerms = Model.attribute('maxTerms');
     createdAt = Model.attribute('createdAt', Model.transformDate);
+    canSearchDiscussions = Model.attribute('canSearchDiscussions');
 
     uniqueKey = computed('id', id => 'taxonomy' + id);
 }

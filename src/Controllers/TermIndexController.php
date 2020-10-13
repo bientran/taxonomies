@@ -28,11 +28,11 @@ class TermIndexController extends AbstractListController
 
     protected function data(ServerRequestInterface $request, Document $document)
     {
-        $this->assertAdmin($request->getAttribute('actor'));
-
         $id = Arr::get($request->getQueryParams(), 'id');
 
         $taxonomy = $this->taxonomies->findOrFail($id);
+
+        $this->assertCan($request->getAttribute('actor'), 'listTerms', $taxonomy);
 
         return $this->terms->all($taxonomy);
     }

@@ -4,12 +4,14 @@ namespace FoF\Taxonomies\Gambits;
 
 use Flarum\Search\AbstractRegexGambit;
 use Flarum\Search\AbstractSearch;
-use FoF\Taxonomies\Term;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Flarum\User\AssertPermissionTrait;
+use FoF\Taxonomies\Taxonomy;
 use Illuminate\Database\Query\Builder;
 
 class TaxonomyGambit extends AbstractRegexGambit
 {
+    use AssertPermissionTrait;
+
     protected $pattern = 'taxonomy:(.+):(.+)';
 
     protected function conditions(AbstractSearch $search, array $matches, $negate)
@@ -17,11 +19,16 @@ class TaxonomyGambit extends AbstractRegexGambit
         $taxonomySlug = trim($matches[1], '"');
         $termSlugs = explode(',', trim($matches[2], '"'));
 
-        $termIdsMap = Term::query()
+        /**
+         * @var $taxonomy Taxonomy
+         */
+        $taxonomy = Taxonomy::query()->where('slug', $taxonomySlug)->firstOrFail();
+
+        $this->assertCan($search->getActor(), 'searchDiscussions', $taxonomy);
+
+        $termIdsMap = $taxonomy->terms()
             ->whereIn('slug', $termSlugs)
-            ->whereHas('taxonomy', function (EloquentBuilder $query) use ($taxonomySlug) {
-                $query->where('slug', $taxonomySlug);
-            })->pluck('id', 'slug');
+            ->pluck('id', 'slug');
 
         $search->getQuery()->where(function (Builder $query) use ($termSlugs, $termIdsMap, $negate) {
             foreach ($termSlugs as $slug) {

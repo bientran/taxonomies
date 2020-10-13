@@ -59,6 +59,12 @@ fof-taxonomies:
             submit:
                 new: Create
                 edit: Save
+        permissions:
+            heading: Taxonomies
+            seeOwnDiscussion: See taxonomies on own discussions
+            seeAnyDiscussion: See taxonomies on all discussions
+            editOwnDiscussion: Edit taxonomies on own discussions
+            editAnyDiscussion: Edit taxonomies on any discussion
 
     forum:
         composer:

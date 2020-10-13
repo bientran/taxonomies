@@ -1,5 +1,6 @@
 import app from 'flarum/app';
 import Discussion from 'flarum/models/Discussion';
+import Forum from 'flarum/models/Forum';
 import Model from 'flarum/Model';
 import addComposerControls from './addComposerControls';
 import addDiscussionControls from './addDiscussionControls';
@@ -14,5 +15,6 @@ app.initializers.add('fof-taxonomies', () => {
     addLabels();
     addModels();
 
+    Forum.prototype.taxonomies = Model.hasMany('taxonomies');
     Discussion.prototype.taxonomyTerms = Model.hasMany('taxonomyTerms');
 });

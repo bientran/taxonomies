@@ -41,5 +41,8 @@ return [
         $events->listen(ConfigureDiscussionGambits::class, function (ConfigureDiscussionGambits $event) {
             $event->gambits->add(Gambits\TaxonomyGambit::class);
         });
+
+        $events->subscribe(Access\DiscussionPolicy::class);
+        $events->subscribe(Access\TaxonomyPolicy::class);
     },
 ];

@@ -10,8 +10,8 @@ use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Event\GetApiRelationship;
 use Flarum\Extend\ExtenderInterface;
 use Flarum\Extension\Extension;
+use FoF\Taxonomies\Repositories\TaxonomyRepository;
 use FoF\Taxonomies\Serializers\TaxonomySerializer;
-use FoF\Taxonomies\Taxonomy;
 use Illuminate\Contracts\Container\Container;
 
 class ForumAttributes implements ExtenderInterface
@@ -42,7 +42,19 @@ class ForumAttributes implements ExtenderInterface
     public function serialize(WillSerializeData $event)
     {
         if ($event->isController(ShowForumController::class)) {
-            $event->data['taxonomies'] = Taxonomy::whereVisibleTo($event->actor)->get();
+            if (
+                $event->actor->hasPermission('discussion.seeOwnTaxonomy') ||
+                $event->actor->hasPermission('discussion.editOwnTaxonomy')
+            ) {
+                /**
+                 * @var $taxonomies TaxonomyRepository
+                 */
+                $taxonomies = app(TaxonomyRepository::class);
+
+                $event->data['taxonomies'] = $taxonomies->all();
+            } else {
+                $event->data['taxonomies'] = [];
+            }
         }
     }
 }

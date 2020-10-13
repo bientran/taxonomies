@@ -7,6 +7,7 @@ use Flarum\Discussion\Event\Saving;
 use Flarum\Extend\ExtenderInterface;
 use Flarum\Extension\Extension;
 use Flarum\Foundation\ValidationException;
+use Flarum\User\AssertPermissionTrait;
 use FoF\Taxonomies\Taxonomy;
 use FoF\Taxonomies\Term;
 use FoF\Transliterator\Transliterator;
@@ -17,6 +18,8 @@ use Illuminate\Support\Str;
 
 class SaveDiscussion implements ExtenderInterface
 {
+    use AssertPermissionTrait;
+
     public function extend(Container $container, Extension $extension = null)
     {
         $container['events']->listen(Saving::class, [$this, 'saving']);
@@ -31,11 +34,15 @@ class SaveDiscussion implements ExtenderInterface
          */
         $validatorFactory = app(Factory::class);
 
+        $alreadyValidatedMinimums = [];
+
         foreach (Arr::get($event->data, 'relationships.taxonomies.data', []) as $taxonomyData) {
             /**
              * @var $taxonomy Taxonomy
              */
-            $taxonomy = Taxonomy::whereVisibleTo($event->actor)->findOrFail(Arr::get($taxonomyData, 'id'));
+            $taxonomy = Taxonomy::findOrFail(Arr::get($taxonomyData, 'id'));
+
+            $this->assertCan($event->actor, 'editTaxonomy', $discussion);
 
             $termIds = [];
             $customTerms = [];
@@ -71,6 +78,8 @@ class SaveDiscussion implements ExtenderInterface
             if ($validator->fails()) {
                 throw new ValidationException([], ['taxonomyTerms' => $validator->getMessageBag()->first($key)]);
             }
+
+            $alreadyValidatedMinimums[] = $taxonomy->id;
 
             foreach ($customTerms as $customTerm) {
                 $key = 'term_name_' . $taxonomy->slug;
@@ -166,6 +175,31 @@ class SaveDiscussion implements ExtenderInterface
                     $discussion->taxonomyTerms()->attach($attach);
                 }
             });
+        }
+
+        // Enforce min_terms for taxonomies that were omitted from payload
+        if (!$discussion->exists && $event->actor->hasPermission('discussion.editOwnTaxonomy')) {
+            $omittedTaxonomiesWithRequiredMinimums = Taxonomy::query()
+                ->whereNotIn('id', $alreadyValidatedMinimums)
+                ->where('min_terms', '>', 0)
+                ->get();
+
+            foreach ($omittedTaxonomiesWithRequiredMinimums as $taxonomy) {
+                if (!$event->actor->can('editTaxonomy', $discussion)) {
+                    continue;
+                }
+
+                $key = 'term_count_' . $taxonomy->slug;
+
+                $validator = $validatorFactory->make(
+                    [$key => $terms->count() + count($customTerms)],
+                    [$key => ['numeric', 'min:' . $taxonomy->min_terms]]
+                );
+
+                if ($validator->fails()) {
+                    throw new ValidationException([], ['taxonomyTerms' => $validator->getMessageBag()->first($key)]);
+                }
+            }
         }
     }
 }

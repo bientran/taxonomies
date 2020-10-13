@@ -24,7 +24,11 @@ class DiscussionAttributes implements ExtenderInterface
     public function serializing(Serializing $event)
     {
         if ($event->isSerializer(DiscussionSerializer::class)) {
-            $event->attributes['fofCanEditTaxonomies'] = false;
+            $event->attributes['fofCanEditTaxonomies'] = $event->actor->can('editTaxonomy', $event->model);
+
+            if ($event->actor->cannot('seeTaxonomy', $event->model)) {
+                $event->model->setRelation('taxonomyTerms', null);
+            }
         }
     }
 

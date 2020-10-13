@@ -1,4 +1,9 @@
 export default function (taxonomies) {
+    // Special case for when retrieving an empty relationship from the store
+    if (taxonomies === false) {
+        taxonomies = [];
+    }
+
     return taxonomies.slice(0).sort((a, b) => {
         const order = a.order() - b.order();
 

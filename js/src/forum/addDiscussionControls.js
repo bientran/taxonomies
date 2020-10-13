@@ -7,8 +7,11 @@ import sortTaxonomies from '../common/utils/sortTaxonomies';
 
 export default function () {
     extend(DiscussionControls, 'moderationControls', function (items, discussion) {
-        sortTaxonomies(app.store.all('fof-taxonomies')).forEach(taxonomy => {
-            // TODO: permission
+        if (!discussion.attribute('fofCanEditTaxonomies')) {
+            return;
+        }
+
+        sortTaxonomies(app.forum.taxonomies()).forEach(taxonomy => {
             items.add('taxonomy' + taxonomy.id(), Button.component({
                 icon: 'fas fa-tag',
                 onclick: () => app.modal.show(new ChooseTaxonomyTermsModal({
