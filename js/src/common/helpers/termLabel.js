@@ -8,7 +8,7 @@ export default function termLabel(term, attrs = {}) {
     attrs.style = attrs.style || {};
     attrs.className = 'TaxonomyLabel ' + (attrs.className || '');
 
-    const link = extract(attrs, 'link') && false; //TODO: link
+    const link = extract(attrs, 'link');
     const tagText = term ? term.name() : app.translator.trans('flarum-tags.lib.deleted_tag_text');
 
     if (term) {
@@ -18,9 +18,9 @@ export default function termLabel(term, attrs = {}) {
             attrs.className += ' colored';
         }
 
-        if (link) {
+        if (link && term.taxonomy()) {
             attrs.title = term.description() || '';
-            attrs.href = app.route('tag', {tags: term.slug()});
+            attrs.href = app.route('index', {[term.taxonomy().slug()]: term.slug()});
             attrs.config = m.route;
         }
     } else {

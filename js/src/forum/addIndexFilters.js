@@ -5,10 +5,10 @@ import DiscussionList from 'flarum/components/DiscussionList';
 import sortTaxonomies from '../common/utils/sortTaxonomies';
 import TaxonomyDropdown from './components/TaxonomyDropdown';
 
-let taxonomyFilterTerms = [];
+/* global m */
 
 export default function () {
-    extend(IndexPage.prototype, 'viewItems', items => {
+    extend(IndexPage.prototype, 'viewItems', function (items) {
         sortTaxonomies(app.store.all('fof-taxonomies')).forEach(taxonomy => {
             if (!taxonomy.canSearchDiscussions() || !taxonomy.showFilter()) {
                 return;
@@ -16,26 +16,27 @@ export default function () {
 
             items.add(taxonomy.uniqueKey(), TaxonomyDropdown.component({
                 taxonomy,
-                term: taxonomyFilterTerms.find(term => {
-                    return term.taxonomy() === taxonomy;
-                }),
+                activeTermSlug: this.params()[taxonomy.slug()],
                 onchange: term => {
-                    const index = taxonomyFilterTerms.indexOf(term);
+                    const params = this.params();
 
-                    if (index === -1) {
-                        // Remove any other term from that taxonomy
-                        taxonomyFilterTerms = taxonomyFilterTerms.filter(existingTerm => {
-                            return existingTerm.taxonomy() !== term.taxonomy();
-                        });
+                    const currentFilterForTaxonomy = params[taxonomy.slug()];
 
-                        taxonomyFilterTerms.push(term);
+                    if (term.slug() === currentFilterForTaxonomy) {
+                        delete params[taxonomy.slug()];
                     } else {
-                        taxonomyFilterTerms.splice(index, 1);
+                        params[taxonomy.slug()] = term.slug();
                     }
 
-                    app.cache.discussionList.refresh();
+                    m.route(app.route(this.props.routeName, params));
                 },
             }));
+        });
+    });
+
+    extend(IndexPage.prototype, 'stickyParams', function (params) {
+        sortTaxonomies(app.store.all('fof-taxonomies')).filter(t => t.showFilter()).forEach(taxonomy => {
+            params[taxonomy.slug()] = m.route.param(taxonomy.slug());
         });
     });
 
@@ -44,8 +45,12 @@ export default function () {
         // Same includes are pre-loaded in DiscussionAttributes.php
         params.include.push('taxonomyTerms', 'taxonomyTerms.taxonomy');
 
-        taxonomyFilterTerms.forEach(term => {
-            params.filter.q = (params.filter.q || '') + ' taxonomy:' + term.taxonomy().slug() + ':' + term.slug();
+        sortTaxonomies(app.store.all('fof-taxonomies')).filter(t => t.showFilter()).forEach(taxonomy => {
+            const filterTermSlug = this.props.params[taxonomy.slug()];
+
+            if (filterTermSlug) {
+                params.filter.q = (params.filter.q || '') + ' taxonomy:' + taxonomy.slug() + ':' + filterTermSlug;
+            }
         });
     });
 }

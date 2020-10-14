@@ -10,40 +10,53 @@ export default class TaxonomyDropdown extends Component {
     init() {
         this.termsInitialized = false;
         this.terms = null;
+
+        // If a term is active while the component inits, we're probably loading a page with pre-loaded filters
+        // We could retrieve the term from the store if it is present on discussion results
+        // But it's unreliable since a page with no results wouldn't have it but we want to show the term in the dropdown
+        if (this.props.activeTermSlug) {
+            this.loadTerms();
+        }
+    }
+
+    loadTerms() {
+        if (this.termsInitialized) {
+            return;
+        }
+
+        this.termsInitialized = true;
+
+        app.request({
+            method: 'GET',
+            url: app.forum.attribute('apiUrl') + this.props.taxonomy.apiEndpoint() + '/terms',
+        }).then(result => {
+            this.terms = app.store.pushPayload(result);
+
+            this.terms.forEach(term => {
+                term.pushData({
+                    relationships: {
+                        taxonomy: this.props.taxonomy,
+                    },
+                });
+            });
+
+            m.redraw();
+        });
     }
 
     view() {
-        const {taxonomy} = this.props;
+        let activeTerm = this.terms && this.terms.find(t => t.slug() === this.props.activeTermSlug);
 
         return Dropdown.component({
             buttonClassName: 'Button',
-            label: taxonomy.name() + (this.props.term ? ': ' + this.props.term.name() : ''),
+            label: this.props.taxonomy.name() + (activeTerm ? ': ' + activeTerm.name() : ''),
             onshow: () => {
-                if (!this.termsInitialized) {
-                    this.termsInitialized = true;
-                }
-
-                app.request({
-                    method: 'GET',
-                    url: app.forum.attribute('apiUrl') + taxonomy.apiEndpoint() + '/terms',
-                }).then(result => {
-                    this.terms = app.store.pushPayload(result);
-
-                    this.terms.forEach(term => {
-                        term.pushData({
-                            relationships: {
-                                taxonomy,
-                            },
-                        });
-                    });
-
-                    m.redraw();
-                });
+                this.loadTerms();
             },
         }, this.terms === null ? [
             LoadingIndicator.component(),
         ] : this.terms.map(term => {
-            const active = this.props.term === term;
+            const active = this.props.activeTermSlug === term.slug();
 
             return Button.component({
                 icon: active ? 'fas fa-check' : true,

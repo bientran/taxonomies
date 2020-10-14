@@ -33,6 +33,9 @@ return [
     (new Extend\Model(Discussion::class))
         ->belongsToMany('taxonomyTerms', Term::class, 'fof_discussion_taxonomy_term', 'discussion_id', 'term_id'),
 
+    (new Extend\Middleware('forum'))
+        ->add(StickyIndexParamsMiddleware::class),
+
     new Extenders\DiscussionAttributes(),
     new Extenders\ForumAttributes(),
     new Extenders\SaveDiscussion(),
