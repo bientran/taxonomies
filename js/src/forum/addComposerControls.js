@@ -13,7 +13,7 @@ import termToIdentifier from '../common/utils/termToIdentifier';
 export default function () {
     extend(DiscussionComposer.prototype, 'headerItems', function (items) {
         sortTaxonomies(app.forum.taxonomies()).forEach(taxonomy => {
-            items.add(taxonomy.uniqueKey(), m('a.DiscussionComposer-changeTaxonomies', {
+            items.add('taxonomy-' + taxonomy.slug(), m('a.DiscussionComposer-changeTaxonomies', {
                     onclick: () => {
                         app.modal.show(new ChooseTaxonomyTermsModal({
                             taxonomy,

@@ -18,5 +18,6 @@ export default class Taxonomy extends Model {
     createdAt = Model.attribute('createdAt', Model.transformDate);
     canSearchDiscussions = Model.attribute('canSearchDiscussions');
 
+    // Used to store the terms on the DiscussionComposer, never visible or part of the DOM
     uniqueKey = computed('id', id => 'taxonomy' + id);
 }

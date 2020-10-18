@@ -14,26 +14,33 @@ fof-taxonomies:
                 new: Create Taxonomy
                 edit: Edit Taxonomy
             field:
-                name: Name
-                slug: Slug
-                description: Description
-                color: Color
-                icon: Icon
+                name: => fof-taxonomies.ref.field.name
+                slug: => fof-taxonomies.ref.field.slug
+                description: => fof-taxonomies.ref.field.description
+                color: => fof-taxonomies.ref.field.color
+                icon: => fof-taxonomies.ref.field.icon
+                iconDescription: => fof-taxonomies.ref.field.iconDescription
                 showLabel: Show taxonomy label together with term
                 showFilter: Show filter on homepage
                 allowCustomValues: Allow custom values
                 customValueValidation: Validation for custom values
                 customValueSlugger: Slugger for custom values
-                minTerms: Minimum number of terms
-                maxTerms: Maximum number of terms
-            delete: Delete
+                customValueSluggerDescription: >
+                    Choose how you want the slug generated.
+                    If a slug already exists, a numeric prefix will automatically be appended.
+                    For the Transliterator option, you need to install and configure that other extension in advance.
+                countRequired: Required number of terms
+                countRequiredDescription: >
+                    Enter the minimum and maximum number of terms from that taxonomies that may be applied to a discussion.
+                rangeSeparatorText: to
+            delete: => fof-taxonomies.ref.delete
             deleteConfirmation: >
                 Do you really want to delete the taxonomy {name}?
                 All terms under that taxonomy will be deleted.
                 Discussions using the taxonomy will NOT be deleted.
             submit:
-                new: Create
-                edit: Save
+                new: => fof-taxonomies.ref.submit.new
+                edit: => fof-taxonomies.ref.submit.edit
             validation-options:
                 default: Any text value
                 alpha_num: Alpha-numerical values
@@ -48,18 +55,19 @@ fof-taxonomies:
                 new: Create Term
                 edit: Edit Term
             field:
-                name: Name
-                slug: Slug
-                description: Description
-                color: Color
-                icon: Icon
-            delete: Delete
+                name: => fof-taxonomies.ref.field.name
+                slug: => fof-taxonomies.ref.field.slug
+                description: => fof-taxonomies.ref.field.description
+                color: => fof-taxonomies.ref.field.color
+                icon: => fof-taxonomies.ref.field.icon
+                iconDescription: => fof-taxonomies.ref.field.iconDescription
+            delete: => fof-taxonomies.ref.delete
             deleteConfirmation: >
                 Do you really want to delete the term {name}?
                 Discussions using the term will NOT be deleted.
             submit:
-                new: Create
-                edit: Save
+                new: => fof-taxonomies.ref.submit.new
+                edit: => fof-taxonomies.ref.submit.edit
         permissions:
             heading: Taxonomies
             seeOwnDiscussion: See taxonomies on own discussions
@@ -77,6 +85,20 @@ fof-taxonomies:
                 edit: Edit {taxonomy} for {title}
             placeholder: Choose a term|Choose {remaining} terms
             custom: Use {value}
+            submit: OK
 
         discussion:
             edit: Edit {taxonomy}
+
+    ref:
+        field:
+            name: Name
+            slug: Slug
+            description: Description
+            color: Color
+            icon: Icon
+            iconDescription: "Enter the name of any <a>FontAwesome</a> icon class, <em>including</em> the <code>fas fa-</code> prefix."
+        delete: Delete
+        submit:
+            new: Create
+            edit: Save

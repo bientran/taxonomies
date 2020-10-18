@@ -94,7 +94,7 @@ export default class ChooseTaxonomyTermsModal extends Modal {
     }
 
     className() {
-        return 'TagDiscussionModal';//TODO
+        return 'ChooseTaxonomyTermsModal';
     }
 
     title() {
@@ -158,40 +158,45 @@ export default class ChooseTaxonomyTermsModal extends Modal {
             availableTerms = [];
         }
 
-        return [
-            m('.Modal-body', m('.TagDiscussionModal-form', [
-                m('.TagDiscussionModal-form-input', m('.TagsInput.FormControl', {
-                    className: this.inputIsFocused ? 'focus' : '',
-                }, [
-                    m('span.TagsInput-selected', this.selectedTerms.map(term => {
-                        return m('span.TagsInput-tag', {
-                            onclick: () => {
-                                this.removeTerm(term);
-                                this.onready();
-                            },
-                        }, termLabel(term));
-                    })),
-                    m('input.FormControl', {
-                        placeholder: extractText(this.getInstruction()),
-                        value: this.searchFilter,
-                        oninput: event => {
-                            this.searchFilter = event.target.value;
-                            this.activeListIndex = 0;
-                        },
-                        onkeydown: this.navigator.navigate.bind(this.navigator),
-                        onfocus: () => this.inputIsFocused = true,
-                        onblur: () => this.inputIsFocused = false,
-                    }),
-                ])),
-                m('.TagDiscussionModal-form-submit.App-primaryControl', Button.component({
+        const description = this.props.taxonomy.description();
 
-                    type: 'submit',
-                    className: 'Button Button--primary',
-                    disabled: this.props.taxonomy.minTerms() && this.selectedTerms.length < this.props.taxonomy.minTerms(),
-                    icon: 'fas fa-check',
-                }, app.translator.trans('flarum-tags.forum.choose_tags.submit_button'))),//TODO
-            ])),
-            m('.Modal-footer', this.availableTerms === null ? LoadingIndicator.component() : m('ul.TagDiscussionModal-list.SelectTagList', availableTerms
+        return [
+            m('.Modal-body', [
+                description ? m('p', description) : null,
+                m('.ChooseTaxonomyTermsModal-form', [
+                    m('.ChooseTaxonomyTermsModal-form-input', m('.TermsInput.FormControl', {
+                        className: this.inputIsFocused ? 'focus' : '',
+                    }, [
+                        m('span.TermsInput-selected', this.selectedTerms.map(term => {
+                            return m('span.TermsInput-term', {
+                                onclick: () => {
+                                    this.removeTerm(term);
+                                    this.onready();
+                                },
+                            }, termLabel(term));
+                        })),
+                        m('input.FormControl', {
+                            placeholder: extractText(this.getInstruction()),
+                            value: this.searchFilter,
+                            oninput: event => {
+                                this.searchFilter = event.target.value;
+                                this.activeListIndex = 0;
+                            },
+                            onkeydown: this.navigator.navigate.bind(this.navigator),
+                            onfocus: () => this.inputIsFocused = true,
+                            onblur: () => this.inputIsFocused = false,
+                        }),
+                    ])),
+                    m('.ChooseTaxonomyTermsModal-form-submit.App-primaryControl', Button.component({
+
+                        type: 'submit',
+                        className: 'Button Button--primary',
+                        disabled: this.props.taxonomy.minTerms() && this.selectedTerms.length < this.props.taxonomy.minTerms(),
+                        icon: 'fas fa-check',
+                    }, app.translator.trans('fof-taxonomies.forum.modal.submit'))),
+                ]),
+            ]),
+            m('.Modal-footer', this.availableTerms === null ? LoadingIndicator.component() : m('ul.ChooseTaxonomyTermsModal-list.SelectTermList', availableTerms
                 .map((term, index) => m('li', {
                     'data-index': index,
                     className: classList({
@@ -204,10 +209,10 @@ export default class ChooseTaxonomyTermsModal extends Modal {
                     onclick: this.toggleTerm.bind(this, term),
                 }, [
                     taxonomyIcon(term),
-                    m('span.SelectTagListItem-name', term.exists ? highlight(term.name(), filter) : app.translator.trans('fof-taxonomies.forum.modal.custom', {
+                    m('span.SelectTermListItem-name', term.exists ? highlight(term.name(), filter) : app.translator.trans('fof-taxonomies.forum.modal.custom', {
                         value: m('em', term.name()),
                     })),
-                    term.description() ? m('span.SelectTagListItem-description', term.description()) : '',
+                    term.description() ? m('span.SelectTermListItem-description', term.description()) : '',
                 ])))),
         ];
     }
@@ -247,9 +252,9 @@ export default class ChooseTaxonomyTermsModal extends Modal {
     }
 
     setIndex(index, scrollToItem) {
-        const $dropdown = this.$('.TagDiscussionModal-list');
+        const $dropdown = this.$('.ChooseTaxonomyTermsModal-list');
 
-        const indexLength = this.$('.TagDiscussionModal-list > li').length;
+        const indexLength = this.$('.ChooseTaxonomyTermsModal-list > li').length;
 
         if (index < 0) {
             index = indexLength - 1;

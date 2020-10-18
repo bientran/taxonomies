@@ -82,6 +82,12 @@ export default class EditTaxonomyModal extends AbstractEditModal {
             ]),
             m('.Form-group', [
                 m('label', app.translator.trans(this.translationPrefix() + 'field.icon')),
+                m('.helpText', app.translator.trans(this.translationPrefix() + 'field.iconDescription', {
+                    a: m('a', {
+                        href: 'https://fontawesome.com/icons?m=free',
+                        tabindex: -1,
+                    }),
+                })),
                 m('input.FormControl', {
                     type: 'text',
                     value: this.icon,
@@ -174,6 +180,7 @@ export default class EditTaxonomyModal extends AbstractEditModal {
             ]),
             m('.Form-group', [
                 m('label', app.translator.trans(this.translationPrefix() + 'field.customValueSlugger')),
+                m('.helpText', app.translator.trans(this.translationPrefix() + 'field.customValueSluggerDescription')),
                 Select.component({
                     options: {
                         random: app.translator.trans(this.translationPrefix() + 'slugger-options.random'),
@@ -189,30 +196,33 @@ export default class EditTaxonomyModal extends AbstractEditModal {
                 }),
             ]),
             m('.Form-group', [
-                m('label', app.translator.trans(this.translationPrefix() + 'field.minTerms')),
-                m('input.FormControl', {
-                    type: 'number',
-                    min: 0,
-                    step: 1,
-                    value: this.minTerms,
-                    oninput: event => {
-                        this.minTerms = parseInt(event.target.value) || '';
-                        this.dirty = true;
-                    },
-                }),
-            ]),
-            m('.Form-group', [
-                m('label', app.translator.trans(this.translationPrefix() + 'field.maxTerms')),
-                m('input.FormControl', {
-                    type: 'number',
-                    min: 0,
-                    step: 1,
-                    value: this.maxTerms,
-                    oninput: event => {
-                        this.maxTerms = parseInt(event.target.value) || '';
-                        this.dirty = true;
-                    },
-                }),
+                m('label', app.translator.trans(this.translationPrefix() + 'field.countRequired')),
+                m('.helpText', app.translator.trans(this.translationPrefix() + 'field.countRequiredDescription')),
+                m('.TaxonomyModal-rangeInput', [
+                    m('input.FormControl', {
+                        type: 'number',
+                        min: 0,
+                        step: 1,
+                        value: this.minTerms,
+                        oninput: event => {
+                            this.minTerms = parseInt(event.target.value) || '';
+                            this.dirty = true;
+                        },
+                    }),
+                    ' ',
+                    app.translator.trans(this.translationPrefix() + 'field.rangeSeparatorText'),
+                    ' ',
+                    m('input.FormControl', {
+                        type: 'number',
+                        min: 0,
+                        step: 1,
+                        value: this.maxTerms,
+                        oninput: event => {
+                            this.maxTerms = parseInt(event.target.value) || '';
+                            this.dirty = true;
+                        },
+                    }),
+                ]),
             ]),
         ];
     }

@@ -20,10 +20,6 @@ class TermIndexController extends AbstractListController
     protected $taxonomies;
     protected $terms;
 
-    // TODO: implement pagination in frontend
-    public $maxLimit = 200;
-    public $limit = 200;
-
     public function __construct(TaxonomyRepository $taxonomies, TermRepository $terms)
     {
         $this->taxonomies = $taxonomies;
@@ -38,6 +34,8 @@ class TermIndexController extends AbstractListController
 
         $this->assertCan($request->getAttribute('actor'), 'listTerms', $taxonomy);
 
+        // TODO: implement pagination & search
+        // The endpoint currently returns all terms all of the time
         return $this->terms->all($taxonomy);
     }
 }

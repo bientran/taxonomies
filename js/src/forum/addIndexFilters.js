@@ -14,7 +14,7 @@ export default function () {
                 return;
             }
 
-            items.add(taxonomy.uniqueKey(), TaxonomyDropdown.component({
+            items.add('taxonomy-' + taxonomy.slug(), TaxonomyDropdown.component({
                 taxonomy,
                 activeTermSlug: this.params()[taxonomy.slug()],
                 onchange: term => {

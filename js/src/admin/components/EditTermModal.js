@@ -75,6 +75,12 @@ export default class EditTermModal extends AbstractEditModal {
             ]),
             m('.Form-group', [
                 m('label', app.translator.trans(this.translationPrefix() + 'field.icon')),
+                m('.helpText', app.translator.trans(this.translationPrefix() + 'field.iconDescription', {
+                    a: m('a', {
+                        href: 'https://fontawesome.com/icons?m=free',
+                        tabindex: -1,
+                    }),
+                })),
                 m('input.FormControl', {
                     type: 'text',
                     value: this.icon,

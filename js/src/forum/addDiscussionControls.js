@@ -12,7 +12,7 @@ export default function () {
         }
 
         sortTaxonomies(app.forum.taxonomies()).forEach(taxonomy => {
-            items.add('taxonomy' + taxonomy.id(), Button.component({
+            items.add('taxonomy-' + taxonomy.slug(), Button.component({
                 icon: 'fas fa-tag',
                 onclick: () => app.modal.show(new ChooseTaxonomyTermsModal({
                     discussion,

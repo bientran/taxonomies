@@ -17,10 +17,14 @@ export default function tagsLabel(terms, attrs = {}) {
             taxonomy = terms[0].taxonomy();
         }
 
-        if (taxonomy && taxonomy.showLabel()) {
-            children.push(termLabel(taxonomy, {
-                className: 'TaxonomyParentLabel',
-            }));
+        if (taxonomy) {
+            attrs['data-slug'] = taxonomy.slug();
+
+            if (taxonomy.showLabel()) {
+                children.push(termLabel(taxonomy, {
+                    className: 'TaxonomyParentLabel',
+                }));
+            }
         }
 
         sortTerms(terms).forEach(tag => {

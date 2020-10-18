@@ -1,6 +1,6 @@
 {
     "name": "fof/taxonomies",
-    "description": "Create custom discussion taxonomies and tags",
+    "description": "Create custom discussion taxonomies and terms",
     "keywords": [
         "flarum"
     ],
