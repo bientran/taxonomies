@@ -13,6 +13,10 @@ import termToIdentifier from '../common/utils/termToIdentifier';
 export default function () {
     extend(DiscussionComposer.prototype, 'headerItems', function (items) {
         sortTaxonomies(app.forum.taxonomies()).forEach(taxonomy => {
+            if (taxonomy.type() !== 'discussions') {
+                return;
+            }
+
             items.add('taxonomy-' + taxonomy.slug(), m('a.DiscussionComposer-changeTaxonomies', {
                     onclick: () => {
                         app.modal.show(new ChooseTaxonomyTermsModal({
@@ -44,6 +48,10 @@ export default function () {
         const callbacks = [];
 
         sortTaxonomies(app.forum.taxonomies()).forEach(taxonomy => {
+            if (taxonomy.type() !== 'discussions') {
+                return;
+            }
+
             const count = (this[taxonomy.uniqueKey()] || []).length;
 
             if (taxonomy.minTerms() && count < taxonomy.minTerms()) {
@@ -99,6 +107,10 @@ export default function () {
 
         // We put all term IDs from all taxonomies together for the request
         app.forum.taxonomies().forEach(taxonomy => {
+            if (taxonomy.type() !== 'discussions') {
+                return;
+            }
+
             if (this[taxonomy.uniqueKey()] && this[taxonomy.uniqueKey()].length) {
                 taxonomyData.push({
                     verbatim: true, // Flarum workaround, see below in Model.getIdentifier

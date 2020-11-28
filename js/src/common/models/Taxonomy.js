@@ -2,6 +2,7 @@ import Model from 'flarum/Model';
 import computed from 'flarum/utils/computed';
 
 export default class Taxonomy extends Model {
+    type = Model.attribute('type');
     name = Model.attribute('name');
     slug = Model.attribute('slug');
     description = Model.attribute('description');
@@ -17,6 +18,7 @@ export default class Taxonomy extends Model {
     maxTerms = Model.attribute('maxTerms');
     createdAt = Model.attribute('createdAt', Model.transformDate);
     canSearchDiscussions = Model.attribute('canSearchDiscussions');
+    canSearchUsers = Model.attribute('canSearchUsers');
 
     // Used to store the terms on the DiscussionComposer, never visible or part of the DOM
     uniqueKey = computed('id', id => 'taxonomy' + id);

@@ -52,8 +52,8 @@ export default class ChooseTaxonomyTermsModal extends Modal {
 
         if (this.props.selectedTerms) {
             this.props.selectedTerms.forEach(this.addTerm.bind(this));
-        } else if (this.props.discussion) {
-            this.props.discussion.taxonomyTerms().forEach(term => {
+        } else if (this.props.resource) {
+            this.props.resource.taxonomyTerms().forEach(term => {
                 if (term.taxonomy().id() === this.props.taxonomy.id()) {
                     this.addTerm(term);
                 }
@@ -98,10 +98,10 @@ export default class ChooseTaxonomyTermsModal extends Modal {
     }
 
     title() {
-        return this.props.discussion
+        return this.props.resource
             ? app.translator.trans('fof-taxonomies.forum.modal.title.edit', {
                 taxonomy: this.props.taxonomy.name(),
-                title: m('em', this.props.discussion.title()),
+                title: m('em', this.props.resource.title ? this.props.resource.title() : this.props.resource.displayName()),
             })
             : app.translator.trans('fof-taxonomies.forum.modal.title.new', {
                 taxonomy: this.props.taxonomy.name(),
@@ -290,8 +290,8 @@ export default class ChooseTaxonomyTermsModal extends Modal {
     onsubmit(event) {
         event.preventDefault();
 
-        if (this.props.discussion) {
-            this.props.discussion.save({
+        if (this.props.resource) {
+            this.props.resource.save({
                 relationships: {
                     taxonomies: [
                         {

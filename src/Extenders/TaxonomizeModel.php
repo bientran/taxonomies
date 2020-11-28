@@ -2,12 +2,16 @@
 
 namespace FoF\Taxonomies\Extenders;
 
-use Flarum\Discussion\Discussion;
-use Flarum\Discussion\Event\Saving;
+use Flarum\Api\Event\Serializing;
+use Flarum\Api\Event\WillGetData;
+use Flarum\Database\AbstractModel;
+use Flarum\Event\GetApiRelationship;
 use Flarum\Extend\ExtenderInterface;
 use Flarum\Extension\Extension;
 use Flarum\Foundation\ValidationException;
 use Flarum\User\AssertPermissionTrait;
+use FoF\Taxonomies\Repositories\TaxonomyRepository;
+use FoF\Taxonomies\Serializers\TermSerializer;
 use FoF\Taxonomies\Taxonomy;
 use FoF\Taxonomies\Term;
 use FoF\Transliterator\Transliterator;
@@ -16,18 +20,109 @@ use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
-class SaveDiscussion implements ExtenderInterface
+class TaxonomizeModel implements ExtenderInterface
 {
     use AssertPermissionTrait;
 
-    public function extend(Container $container, Extension $extension = null)
+    protected $type;
+    protected $serializer;
+    protected $savingEvent;
+    protected $savingEventModelCallback;
+    protected $validateNonExistingCallback;
+    protected $includeInControllers;
+
+    /**
+     * @param string $type The type value of the taxonomy for this model
+     * @param string $serializer The ::class of the serializer we want to connect Terms to
+     * @param string $savingEvent The ::class of the event for saving the model we connect Terms to
+     * @param callable $savingEventModelCallback A callback that receives the saving event and returns the eloquent model
+     */
+    public function __construct(string $type, string $serializer, string $savingEvent, callable $savingEventModelCallback)
     {
-        $container['events']->listen(Saving::class, [$this, 'saving']);
+        $this->type = $type;
+        $this->serializer = $serializer;
+        $this->savingEvent = $savingEvent;
+        $this->savingEventModelCallback = $savingEventModelCallback;
     }
 
-    public function saving(Saving $event)
+    /**
+     * Add a ::class controller to the list of controllers that should include the terms by default
+     * @param string $controller
+     * @return $this
+     */
+    public function includeInController(string $controller)
     {
-        $discussion = $event->discussion;
+        $this->includeInControllers[] = $controller;
+
+        return $this;
+    }
+
+    /**
+     * Registers a callback that receives the saving event and determines whether missing terms should be validated
+     * @param callable $callback
+     * @return $this
+     */
+    public function validateNonExistingCallback(callable $callback)
+    {
+        $this->validateNonExistingCallback[] = $callback;
+
+        return $this;
+    }
+
+    public function extend(Container $container, Extension $extension = null)
+    {
+        $container['events']->listen(Serializing::class, [$this, 'serializing']);
+        $container['events']->listen(GetApiRelationship::class, [$this, 'relationship']);
+        $container['events']->listen(WillGetData::class, [$this, 'includes']);
+        $container['events']->listen($this->savingEvent, [$this, 'saving']);
+    }
+
+    public function serializing(Serializing $event)
+    {
+        if ($event->isSerializer($this->serializer)) {
+            $event->attributes['fofCanEditTaxonomies'] = $event->actor->can('editTaxonomy', $event->model);
+
+            if ($event->actor->cannot('seeTaxonomy', $event->model)) {
+                $event->model->setRelation('taxonomyTerms', null);
+            }
+        }
+    }
+
+    public function relationship(GetApiRelationship $event)
+    {
+        if ($event->isRelationship($this->serializer, 'taxonomyTerms')) {
+            return $event->serializer->hasMany($event->model, TermSerializer::class, 'taxonomyTerms');
+        }
+    }
+
+    public function includes(WillGetData $event)
+    {
+        foreach ($this->includeInControllers as $controller) {
+            if ($event->isController($controller)) {
+                $event->addInclude([
+                    'taxonomyTerms',
+                    'taxonomyTerms.taxonomy',
+                ]);
+                return;
+            }
+        }
+    }
+
+    /**
+     * @param \Flarum\User\Event\Saving|\Flarum\Discussion\Event\Saving $event
+     * @throws ValidationException
+     */
+    public function saving($event)
+    {
+        /**
+         * @var $model AbstractModel
+         */
+        $model = call_user_func($this->savingEventModelCallback, $event);
+
+        /**
+         * @var $repository TaxonomyRepository
+         */
+        $repository = app(TaxonomyRepository::class);
 
         /**
          * @var $validatorFactory Factory
@@ -37,12 +132,9 @@ class SaveDiscussion implements ExtenderInterface
         $alreadyValidatedMinimums = [];
 
         foreach (Arr::get($event->data, 'relationships.taxonomies.data', []) as $taxonomyData) {
-            /**
-             * @var $taxonomy Taxonomy
-             */
-            $taxonomy = Taxonomy::findOrFail(Arr::get($taxonomyData, 'id'));
+            $taxonomy = $repository->findIdOrFail(Arr::get($taxonomyData, 'id'), $this->type);
 
-            $this->assertCan($event->actor, 'editTaxonomy', $discussion);
+            $this->assertCan($event->actor, 'editTaxonomy', $model);
 
             $termIds = [];
             $customTerms = [];
@@ -160,32 +252,33 @@ class SaveDiscussion implements ExtenderInterface
                 $newTermIds[] = $term->id;
             }
 
-            $discussion->afterSave(function (Discussion $discussion) use ($taxonomy, $newTermIds) {
+            $model->afterSave(function (AbstractModel $model) use ($taxonomy, $newTermIds) {
                 // Implementation similar to $relationship->sync(), but taxonomy-aware
 
-                $currentTermIds = $discussion->taxonomyTerms()->where('taxonomy_id', $taxonomy->id)->pluck('id')->all();
+                $currentTermIds = $model->taxonomyTerms()->where('taxonomy_id', $taxonomy->id)->pluck('id')->all();
 
                 $detach = array_diff($currentTermIds, $newTermIds);
                 if (count($detach) > 0) {
-                    $discussion->taxonomyTerms()->detach($detach);
+                    $model->taxonomyTerms()->detach($detach);
                 }
 
                 $attach = array_diff($newTermIds, $currentTermIds);
                 if (count($attach) > 0) {
-                    $discussion->taxonomyTerms()->attach($attach);
+                    $model->taxonomyTerms()->attach($attach);
                 }
             });
         }
 
         // Enforce min_terms for taxonomies that were omitted from payload
-        if (!$discussion->exists && $event->actor->hasPermission('discussion.editOwnTaxonomy')) {
+        if ($this->validateNonExistingCallback && call_user_func($this->validateNonExistingCallback, $event)) {
             $omittedTaxonomiesWithRequiredMinimums = Taxonomy::query()
+                ->where('type', $this->type)
                 ->whereNotIn('id', $alreadyValidatedMinimums)
                 ->where('min_terms', '>', 0)
                 ->get();
 
             foreach ($omittedTaxonomiesWithRequiredMinimums as $taxonomy) {
-                if (!$event->actor->can('editTaxonomy', $discussion)) {
+                if (!$event->actor->can('editTaxonomy', $model)) {
                     continue;
                 }
 

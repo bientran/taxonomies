@@ -14,6 +14,11 @@ fof-taxonomies:
                 new: Create Taxonomy
                 edit: Edit Taxonomy
             field:
+                type: Type
+                typeDescription: >
+                    Taxonomies can be used on multiple Flarum resources.
+                    The type cannot be changed after creation.
+                    You can use identical names and slugs for taxonomies of different types.
                 name: => fof-taxonomies.ref.field.name
                 slug: => fof-taxonomies.ref.field.slug
                 description: => fof-taxonomies.ref.field.description
@@ -41,6 +46,9 @@ fof-taxonomies:
             submit:
                 new: => fof-taxonomies.ref.submit.new
                 edit: => fof-taxonomies.ref.submit.edit
+            type-options:
+                discussions: Discussions
+                users: Users
             validation-options:
                 default: Any text value
                 alpha_num: Alpha-numerical values
@@ -88,6 +96,9 @@ fof-taxonomies:
             submit: OK
 
         discussion:
+            edit: Edit {taxonomy}
+
+        user:
             edit: Edit {taxonomy}
 
     ref:

@@ -30,7 +30,7 @@ class TermIndexController extends AbstractListController
     {
         $id = Arr::get($request->getQueryParams(), 'id');
 
-        $taxonomy = $this->taxonomies->findOrFail($id);
+        $taxonomy = $this->taxonomies->findIdOrFail($id);
 
         $this->assertCan($request->getAttribute('actor'), 'listTerms', $taxonomy);
 

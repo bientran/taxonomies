@@ -29,7 +29,7 @@ class TaxonomyUpdateController extends AbstractShowController
 
         $id = Arr::get($request->getQueryParams(), 'id');
 
-        $taxonomy = $this->repository->findOrFail($id);
+        $taxonomy = $this->repository->findIdOrFail($id);
 
         $attributes = Arr::get($request->getParsedBody(), 'data.attributes', []);
 

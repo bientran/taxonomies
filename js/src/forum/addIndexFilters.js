@@ -10,6 +10,10 @@ import TaxonomyDropdown from './components/TaxonomyDropdown';
 export default function () {
     extend(IndexPage.prototype, 'viewItems', function (items) {
         sortTaxonomies(app.store.all('fof-taxonomies')).forEach(taxonomy => {
+            if (taxonomy.type() !== 'discussions') {
+                return;
+            }
+
             if (!taxonomy.canSearchDiscussions() || !taxonomy.showFilter()) {
                 return;
             }

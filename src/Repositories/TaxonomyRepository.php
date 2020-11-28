@@ -1,13 +1,14 @@
 <?php
 
-
 namespace FoF\Taxonomies\Repositories;
 
+use Flarum\Foundation\ValidationException;
 use FoF\Taxonomies\Taxonomy;
 use FoF\Taxonomies\Validators\TaxonomyValidator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class TaxonomyRepository
 {
@@ -29,11 +30,34 @@ class TaxonomyRepository
 
     /**
      * @param $id
+     * @param string $type
      * @return Model|Taxonomy
      */
-    public function findOrFail($id): Taxonomy
+    public function findIdOrFail($id, $type = null): Taxonomy
     {
-        return $this->taxonomy->newQuery()->findOrFail($id);
+        $query = $this->taxonomy->newQuery();
+
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        return $query->findOrFail($id);
+    }
+
+    /**
+     * @param string $slug
+     * @param string $type
+     * @return Model|Taxonomy
+     */
+    public function findSlugOrFail(string $slug, $type = null): Taxonomy
+    {
+        $query = $this->taxonomy->newQuery();
+
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        return $query->where('slug', $slug)->firstOrFail();
     }
 
     /**
@@ -46,6 +70,7 @@ class TaxonomyRepository
 
     public function store(array $attributes): Taxonomy
     {
+        $this->validator->type = Arr::get($attributes, 'type');
         $this->validator->assertValid($attributes);
 
         $taxonomy = new Taxonomy($attributes);
@@ -56,10 +81,19 @@ class TaxonomyRepository
 
     public function update(Taxonomy $taxonomy, array $attributes): Taxonomy
     {
+        $this->validator->type = $taxonomy->type;
         $this->validator->ignore = $taxonomy;
         $this->validator->assertValid($attributes);
 
         $taxonomy->fill($attributes);
+
+        if ($taxonomy->isDirty('type')) {
+            throw new ValidationException([
+                // Not translated on purpose. This message should never show up because the UI doesn't offer the field for edit
+                'type' => 'Cannot change type of existing taxonomy',
+            ]);
+        }
+
         $taxonomy->save();
 
         return $taxonomy;

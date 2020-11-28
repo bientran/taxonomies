@@ -12,6 +12,7 @@ export default class EditTaxonomyModal extends AbstractEditModal {
 
         const {taxonomy} = this.props;
 
+        this.type = taxonomy ? taxonomy.type() : 'discussions';
         this.name = taxonomy ? taxonomy.name() : '';
         this.slug = taxonomy ? taxonomy.slug() : '';
         this.description = taxonomy ? taxonomy.description() : '';
@@ -36,6 +37,22 @@ export default class EditTaxonomyModal extends AbstractEditModal {
 
     form() {
         return [
+            m('.Form-group', [
+                m('label', app.translator.trans(this.translationPrefix() + 'field.type')),
+                m('.helpText', app.translator.trans(this.translationPrefix() + 'field.typeDescription')),
+                Select.component({
+                    options: {
+                        discussions: app.translator.trans(this.translationPrefix() + 'type-options.discussions'),
+                        users: app.translator.trans(this.translationPrefix() + 'type-options.users'),
+                    },
+                    value: this.type,
+                    onchange: value => {
+                        this.type = value;
+                        this.dirty = true;
+                    },
+                    disabled: !this.isNew(),
+                }),
+            ]),
             m('.Form-group', [
                 m('label', app.translator.trans(this.translationPrefix() + 'field.name')),
                 m('input.FormControl', {
@@ -255,6 +272,7 @@ export default class EditTaxonomyModal extends AbstractEditModal {
         const record = this.props.taxonomy || app.store.createRecord('fof-taxonomies');
 
         record.save({
+            type: this.type,
             name: this.name,
             slug: this.slug,
             description: this.description,

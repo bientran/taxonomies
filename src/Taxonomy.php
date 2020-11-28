@@ -8,6 +8,7 @@ use Flarum\Database\ScopeVisibilityTrait;
 
 /**
  * @property int $id
+ * @property string $type
  * @property string $name
  * @property string $slug
  * @property string $description
@@ -33,6 +34,7 @@ class Taxonomy extends AbstractModel
     public $timestamps = true;
 
     protected $fillable = [
+        'type',
         'name',
         'slug',
         'description',

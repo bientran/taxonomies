@@ -16,6 +16,7 @@ class TaxonomySerializer extends AbstractSerializer
     protected function getDefaultAttributes($taxonomy)
     {
         $attributes = [
+            'type' => $taxonomy->type,
             'name' => $taxonomy->name,
             'slug' => $taxonomy->slug,
             'description' => $taxonomy->description,

@@ -5,10 +5,10 @@ namespace FoF\Taxonomies\Gambits;
 use Flarum\Search\AbstractRegexGambit;
 use Flarum\Search\AbstractSearch;
 use Flarum\User\AssertPermissionTrait;
-use FoF\Taxonomies\Taxonomy;
+use FoF\Taxonomies\Repositories\TaxonomyRepository;
 use Illuminate\Database\Query\Builder;
 
-class TaxonomyGambit extends AbstractRegexGambit
+class DiscussionTaxonomyGambit extends AbstractRegexGambit
 {
     use AssertPermissionTrait;
 
@@ -20,9 +20,11 @@ class TaxonomyGambit extends AbstractRegexGambit
         $termSlugs = explode(',', trim($matches[2], '"'));
 
         /**
-         * @var $taxonomy Taxonomy
+         * @var $repository TaxonomyRepository
          */
-        $taxonomy = Taxonomy::query()->where('slug', $taxonomySlug)->firstOrFail();
+        $repository = app(TaxonomyRepository::class);
+
+        $taxonomy = $repository->findSlugOrFail($taxonomySlug, 'discussions');
 
         $this->assertCan($search->getActor(), 'searchDiscussions', $taxonomy);
 

@@ -34,6 +34,31 @@ export default function () {
             permission: 'discussion.editAnyTaxonomy',
         });
 
+        items.add('seeOwnUser', {
+            icon: 'fas fa-eye',
+            label: app.translator.trans(translationPrefix + 'seeOwnUser'),
+            permission: 'user.seeOwnTaxonomy',
+        });
+
+        items.add('seeAnyUser', {
+            icon: 'fas fa-eye',
+            label: app.translator.trans(translationPrefix + 'seeAnyUser'),
+            permission: 'user.seeAnyTaxonomy',
+            allowGuest: true,
+        });
+
+        items.add('editOwnUser', {
+            icon: 'fas fa-tag',
+            label: app.translator.trans(translationPrefix + 'editOwnUser'),
+            permission: 'user.editOwnTaxonomy',
+        });
+
+        items.add('editAnyUser', {
+            icon: 'fas fa-tag',
+            label: app.translator.trans(translationPrefix + 'editAnyUser'),
+            permission: 'user.editAnyTaxonomy',
+        });
+
         permissionGroups.add('taxonomies', {
             label: app.translator.trans(translationPrefix + 'heading'),
             children: items.toArray()

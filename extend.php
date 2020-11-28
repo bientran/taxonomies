@@ -2,9 +2,16 @@
 
 namespace FoF\Taxonomies;
 
+use Flarum\Api\Controller;
+use Flarum\Api\Serializer\DiscussionSerializer;
+use Flarum\Api\Serializer\UserSerializer;
 use Flarum\Discussion\Discussion;
+use Flarum\Discussion\Event\Saving as DiscussionSaving;
 use Flarum\Event\ConfigureDiscussionGambits;
+use Flarum\Event\ConfigureUserGambits;
 use Flarum\Extend;
+use Flarum\User\Event\Saving as UserSaving;
+use Flarum\User\User;
 use Illuminate\Contracts\Events\Dispatcher;
 
 return [
@@ -32,20 +39,53 @@ return [
 
     (new Extend\Model(Discussion::class))
         ->belongsToMany('taxonomyTerms', Term::class, 'fof_discussion_taxonomy_term', 'discussion_id', 'term_id'),
+    (new Extend\Model(User::class))
+        ->belongsToMany('taxonomyTerms', Term::class, 'fof_taxonomy_term_user', 'user_id', 'term_id'),
 
     (new Extend\Middleware('forum'))
         ->add(StickyIndexParamsMiddleware::class),
 
-    new Extenders\DiscussionAttributes(),
+    (new Extenders\TaxonomizeModel(
+        'discussions',
+        DiscussionSerializer::class,
+        DiscussionSaving::class,
+        function (DiscussionSaving $event) {
+            return $event->discussion;
+        }
+    ))
+        ->includeInController(Controller\ListDiscussionsController::class)
+        ->includeInController(Controller\ShowDiscussionController::class)
+        ->includeInController(Controller\CreateDiscussionController::class)
+        ->includeInController(Controller\UpdateDiscussionController::class)
+        ->validateNonExistingCallback(function (DiscussionSaving $event) {
+            return !$event->discussion->exists && $event->actor->hasPermission('discussion.editOwnTaxonomy');
+        }),
+
+    (new Extenders\TaxonomizeModel(
+        'users',
+        UserSerializer::class,
+        UserSaving::class,
+        function (UserSaving $event) {
+            return $event->user;
+        }
+    ))
+        ->includeInController(Controller\ListUsersController::class)
+        ->includeInController(Controller\ShowUserController::class)
+        ->includeInController(Controller\CreateUserController::class)
+        ->includeInController(Controller\UpdateUserController::class),
+
     new Extenders\ForumAttributes(),
-    new Extenders\SaveDiscussion(),
 
     function (Dispatcher $events) {
         $events->listen(ConfigureDiscussionGambits::class, function (ConfigureDiscussionGambits $event) {
-            $event->gambits->add(Gambits\TaxonomyGambit::class);
+            $event->gambits->add(Gambits\DiscussionTaxonomyGambit::class);
+        });
+        $events->listen(ConfigureUserGambits::class, function (ConfigureUserGambits $event) {
+            $event->gambits->add(Gambits\UserTaxonomyGambit::class);
         });
 
         $events->subscribe(Access\DiscussionPolicy::class);
         $events->subscribe(Access\TaxonomyPolicy::class);
+        $events->subscribe(Access\UserPolicy::class);
     },
 ];

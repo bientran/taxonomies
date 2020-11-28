@@ -14,10 +14,17 @@ class TaxonomyPolicy extends AbstractPolicy
     {
         // For now, it's all or nothing. If you are allowed to see or edit anything, we expose the full list of existing taxonomies
         return $actor->hasPermission('discussion.seeOwnTaxonomy') ||
-            $actor->hasPermission('discussion.editOwnTaxonomy');
+            $actor->hasPermission('discussion.editOwnTaxonomy') ||
+            $actor->hasPermission('user.seeOwnTaxonomy') ||
+            $actor->hasPermission('user.editOwnTaxonomy');
     }
 
     public function searchDiscussions(User $actor, Taxonomy $taxonomy)
+    {
+        return $this->canSeeAllTaxonomies($actor);
+    }
+
+    public function searchUsers(User $actor, Taxonomy $taxonomy)
     {
         return $this->canSeeAllTaxonomies($actor);
     }
