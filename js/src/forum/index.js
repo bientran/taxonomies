@@ -10,6 +10,11 @@ import addLabels from './addLabels';
 import addUserControls from './addUserControls';
 import addModels from '../common/addModels';
 
+export * from './components';
+export * from '../common/helpers';
+export * from '../common/models';
+export * from '../common/utils';
+
 app.initializers.add('fof-taxonomies', () => {
     addComposerControls();
     addDiscussionControls();
