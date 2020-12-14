@@ -11,19 +11,19 @@ class UserPolicy extends AbstractPolicy
 
     public function seeTaxonomy(User $actor, User $user)
     {
-        if ($user->id === $actor->id && $actor->can('user.seeOwnTaxonomy', $user)) {
+        if ($user->id === $actor->id && $actor->hasPermission('user.seeOwnTaxonomy')) {
             return true;
         }
 
-        return $actor->can('user.seeAnyTaxonomy', $user);
+        return $actor->hasPermission('user.seeAnyTaxonomy');
     }
 
     public function editTaxonomy(User $actor, User $user)
     {
-        if ($user->id === $actor->id && $actor->can('user.editOwnTaxonomy', $user)) {
+        if ($user->id === $actor->id && $actor->hasPermission('user.editOwnTaxonomy')) {
             return true;
         }
 
-        return $actor->can('user.editAnyTaxonomy', $user);
+        return $actor->hasPermission('user.editAnyTaxonomy');
     }
 }
