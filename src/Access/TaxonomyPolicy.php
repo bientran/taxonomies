@@ -21,12 +21,12 @@ class TaxonomyPolicy extends AbstractPolicy
 
     public function searchDiscussions(User $actor, Taxonomy $taxonomy)
     {
-        return $this->canSeeAllTaxonomies($actor);
+        return $taxonomy->type === 'discussions' && $this->canSeeAllTaxonomies($actor);
     }
 
     public function searchUsers(User $actor, Taxonomy $taxonomy)
     {
-        return $this->canSeeAllTaxonomies($actor);
+        return $taxonomy->type === 'users' && $this->canSeeAllTaxonomies($actor);
     }
 
     public function listTerms(User $actor, Taxonomy $taxonomy)

@@ -30,6 +30,7 @@ class TaxonomySerializer extends AbstractSerializer
             'minTerms' => $taxonomy->min_terms,
             'maxTerms' => $taxonomy->max_terms,
             'canSearchDiscussions' => $this->actor->can('searchDiscussions', $taxonomy),
+            'canSearchUsers' => $this->actor->can('searchUsers', $taxonomy),
         ];
 
         if ($this->actor->isAdmin()) {

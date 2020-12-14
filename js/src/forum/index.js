@@ -9,6 +9,7 @@ import addIndexFilters from './addIndexFilters';
 import addLabels from './addLabels';
 import addUserControls from './addUserControls';
 import addModels from '../common/addModels';
+import addUserDirectorySearchType from './addUserDirectorySearchType';
 
 export * from './components';
 export * from '../common/helpers';
@@ -22,6 +23,7 @@ app.initializers.add('fof-taxonomies', () => {
     addLabels();
     addUserControls();
     addModels();
+    addUserDirectorySearchType();
 
     Forum.prototype.taxonomies = Model.hasMany('taxonomies');
     Discussion.prototype.taxonomyTerms = Model.hasMany('taxonomyTerms');

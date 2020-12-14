@@ -10,10 +10,6 @@ import TaxonomyDropdown from './components/TaxonomyDropdown';
 export default function () {
     extend(IndexPage.prototype, 'viewItems', function (items) {
         sortTaxonomies(app.store.all('fof-taxonomies')).forEach(taxonomy => {
-            if (taxonomy.type() !== 'discussions') {
-                return;
-            }
-
             if (!taxonomy.canSearchDiscussions() || !taxonomy.showFilter()) {
                 return;
             }
@@ -39,7 +35,7 @@ export default function () {
     });
 
     extend(IndexPage.prototype, 'stickyParams', function (params) {
-        sortTaxonomies(app.store.all('fof-taxonomies')).filter(t => t.showFilter()).forEach(taxonomy => {
+        sortTaxonomies(app.store.all('fof-taxonomies')).filter(t => t.canSearchDiscussions() && t.showFilter()).forEach(taxonomy => {
             params[taxonomy.slug()] = m.route.param(taxonomy.slug());
         });
     });
@@ -49,7 +45,7 @@ export default function () {
         // Same includes are pre-loaded in DiscussionAttributes.php
         params.include.push('taxonomyTerms', 'taxonomyTerms.taxonomy');
 
-        sortTaxonomies(app.store.all('fof-taxonomies')).filter(t => t.showFilter()).forEach(taxonomy => {
+        sortTaxonomies(app.store.all('fof-taxonomies')).filter(t => t => t.canSearchDiscussions() && t.showFilter()).forEach(taxonomy => {
             const filterTermSlug = this.props.params[taxonomy.slug()];
 
             if (filterTermSlug) {
