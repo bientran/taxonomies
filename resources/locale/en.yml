@@ -82,6 +82,12 @@ fof-taxonomies:
             seeAnyDiscussion: See taxonomies on all discussions
             editOwnDiscussion: Edit taxonomies on own discussions
             editAnyDiscussion: Edit taxonomies on any discussion
+            seeOwnUser: See taxonomies on own user
+            seeAnyUser: See taxonomies on any user
+            editOwnUser: Edit taxonomies on own user
+            editAnyUser: Edit taxonomies on any user
+            ownDisabledEveryone: Non-activated and suspended members
+            ownDisabledMembers: Activated members
 
     forum:
         composer:
