@@ -64,7 +64,7 @@ class TaxonomizeModel implements ExtenderInterface
      */
     public function validateNonExistingCallback(callable $callback)
     {
-        $this->validateNonExistingCallback[] = $callback;
+        $this->validateNonExistingCallback = $callback;
 
         return $this;
     }
@@ -131,10 +131,14 @@ class TaxonomizeModel implements ExtenderInterface
 
         $alreadyValidatedMinimums = [];
 
-        foreach (Arr::get($event->data, 'relationships.taxonomies.data', []) as $taxonomyData) {
-            $taxonomy = $repository->findIdOrFail(Arr::get($taxonomyData, 'id'), $this->type);
+        $taxonomiesData = Arr::get($event->data, 'relationships.taxonomies.data', []);
 
+        if (count($taxonomiesData)) {
             $this->assertCan($event->actor, 'editTaxonomy', $model);
+        }
+
+        foreach ($taxonomiesData as $taxonomyData) {
+            $taxonomy = $repository->findIdOrFail(Arr::get($taxonomyData, 'id'), $this->type);
 
             $termIds = [];
             $customTerms = [];
@@ -270,7 +274,11 @@ class TaxonomizeModel implements ExtenderInterface
         }
 
         // Enforce min_terms for taxonomies that were omitted from payload
-        if ($this->validateNonExistingCallback && call_user_func($this->validateNonExistingCallback, $event)) {
+        if (
+            $this->validateNonExistingCallback &&
+            call_user_func($this->validateNonExistingCallback, $event) &&
+            $event->actor->can('editTaxonomy', $model)
+        ) {
             $omittedTaxonomiesWithRequiredMinimums = Taxonomy::query()
                 ->where('type', $this->type)
                 ->whereNotIn('id', $alreadyValidatedMinimums)
@@ -278,14 +286,10 @@ class TaxonomizeModel implements ExtenderInterface
                 ->get();
 
             foreach ($omittedTaxonomiesWithRequiredMinimums as $taxonomy) {
-                if (!$event->actor->can('editTaxonomy', $model)) {
-                    continue;
-                }
-
                 $key = 'term_count_' . $taxonomy->slug;
 
                 $validator = $validatorFactory->make(
-                    [$key => $terms->count() + count($customTerms)],
+                    [$key => 0],
                     [$key => ['numeric', 'min:' . $taxonomy->min_terms]]
                 );
 
