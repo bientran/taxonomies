@@ -1,5 +1,6 @@
 import app from 'flarum/app';
 import extract from 'flarum/utils/extract';
+import Term from '../models/Term';
 import taxonomyIcon from './taxonomyIcon';
 
 /* global m */
@@ -8,8 +9,10 @@ export default function termLabel(term, attrs = {}) {
     attrs.style = attrs.style || {};
     attrs.className = 'TaxonomyLabel ' + (attrs.className || '');
 
-    const link = extract(attrs, 'link');
+    const discussionLink = extract(attrs, 'discussionLink');
+    const userLink = extract(attrs, 'userLink');
     const tagText = term ? term.name() : app.translator.trans('flarum-tags.lib.deleted_tag_text');
+    let tag = 'span';
 
     if (term) {
         const color = term.color();
@@ -18,16 +21,28 @@ export default function termLabel(term, attrs = {}) {
             attrs.className += ' colored';
         }
 
-        if (link && term.taxonomy()) {
-            attrs.title = term.description() || '';
-            attrs.href = app.route('index', {[term.taxonomy().slug()]: term.slug()});
-            attrs.config = m.route;
+        // We need to check for instanceof because this method is also used with a taxonomy passed as a value
+        if (term instanceof Term && term.taxonomy() && term.taxonomy().showFilter()) {
+            if (discussionLink) {
+                attrs.title = term.description() || '';
+                attrs.href = app.route('index', {[term.taxonomy().slug()]: term.slug()});
+                attrs.config = m.route;
+                tag = 'a';
+            }
+
+            // Only generate user taxonomy links if fof/user-directory is enabled
+            if (userLink && app.routes.fof_user_directory) {
+                attrs.title = term.description() || '';
+                attrs.href = app.route('fof_user_directory', {q: 'taxonomy:' + term.taxonomy().slug() + ':' + term.slug()});
+                attrs.config = m.route;
+                tag = 'a';
+            }
         }
     } else {
         attrs.className += ' untagged';
     }
 
-    return m((link ? 'a' : 'span'), attrs, m('span.TaxonomyLabel-text', [
+    return m(tag, attrs, m('span.TaxonomyLabel-text', [
         term && term.icon() && taxonomyIcon(term, {}, {useColor: false}),
         ' ' + tagText,
     ]));

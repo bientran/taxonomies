@@ -6,7 +6,8 @@ import sortTerms from '../utils/sortTerms';
 
 export default function tagsLabel(terms, attrs = {}) {
     const children = [];
-    const link = extract(attrs, 'link');
+    const discussionLink = extract(attrs, 'discussionLink');
+    const userLink = extract(attrs, 'userLink');
 
     attrs.className = 'TaxonomiesLabel ' + (attrs.className || '');
 
@@ -29,7 +30,7 @@ export default function tagsLabel(terms, attrs = {}) {
 
         sortTerms(terms).forEach(tag => {
             if (tag || terms.length === 1) {
-                children.push(termLabel(tag, {link}));
+                children.push(termLabel(tag, {discussionLink, userLink}));
             }
         });
     } else {

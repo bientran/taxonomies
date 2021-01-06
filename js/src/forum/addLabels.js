@@ -16,7 +16,7 @@ export default function () {
         const terms = this.props.discussion.taxonomyTerms();
 
         if (terms && terms.length) {
-            items.add('taxonomies', labelsFromMultipleTaxonomiesList(terms, {link: true}), 5);
+            items.add('taxonomies', labelsFromMultipleTaxonomiesList(terms, {discussionLink: true}), 5);
         }
     });
 }

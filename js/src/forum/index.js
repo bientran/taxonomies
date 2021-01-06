@@ -7,6 +7,7 @@ import addComposerControls from './addComposerControls';
 import addDiscussionControls from './addDiscussionControls';
 import addIndexFilters from './addIndexFilters';
 import addLabels from './addLabels';
+import addPages from './addPages';
 import addUserControls from './addUserControls';
 import addModels from '../common/addModels';
 import addUserDirectorySearchType from './addUserDirectorySearchType';
@@ -21,6 +22,7 @@ app.initializers.add('fof-taxonomies', () => {
     addDiscussionControls();
     addIndexFilters();
     addLabels();
+    addPages();
     addUserControls();
     addModels();
     addUserDirectorySearchType();

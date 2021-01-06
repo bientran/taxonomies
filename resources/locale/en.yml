@@ -106,6 +106,7 @@ fof-taxonomies:
             edit: Edit {taxonomy}
 
         user:
+            nav: Taxonomies
             edit: Edit {taxonomy}
 
     ref:
