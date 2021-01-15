@@ -77,7 +77,24 @@ export default class ChooseTaxonomyTermsModal extends Modal {
             .onDown(() => this.setIndex(this.activeListIndex + 1, true))
             .onSelect(this.select.bind(this))
             .onRemove(() => {
+                if (!this.selectedTerms.length) {
+                    return;
+                }
+
                 this.toggleTerm(this.selectedTerms[this.selectedTerms.length - 1]);
+            })
+            .when(event => {
+                // We want to allow selecting with space because it's a common way to select
+                // However this interferes with the ability to enter spaces
+                // So we will have space act as select, but only if nothing is typed yet
+                if (event.key === ' ' && this.searchFilter === '') {
+                    event.preventDefault();
+                    this.select(event);
+
+                    return false;
+                }
+
+                return true;
             });
     }
 
@@ -221,22 +238,20 @@ export default class ChooseTaxonomyTermsModal extends Modal {
                 this.activeListIndex = 0;
             },
             onkeydown: this.navigator.navigate.bind(this.navigator),
-            onfocus: () => this.inputIsFocused = true,
-            onblur: () => {
-                // We delay the redraw so that clicking something doesn't immediately removes the focus
-                // This isn't necessary for the features bundled in the extension, but necessary for the
-                // Dropdown variation of this component that can be implemented by other extensions
-                m.redraw.strategy('none');
-
-                this.inputIsFocused = false;
-
-                setTimeout(() => {
-                    m.redraw();
-                }, 100);
-            },
+            // Use local methods so that other extensions can extend behaviour
+            onfocus: this.oninputfocus.bind(this),
+            onblur: this.oninputblur.bind(this),
         }), 10);
 
         return items;
+    }
+
+    oninputfocus() {
+        this.inputIsFocused = true;
+    }
+
+    oninputblur() {
+        this.inputIsFocused = false;
     }
 
     listAvailableTerms(terms) {
@@ -285,6 +300,14 @@ export default class ChooseTaxonomyTermsModal extends Modal {
 
     select(e) {
         const $element = this.getDomElement(this.activeListIndex);
+
+        // If nothing matches, the user probably typed text that doesn't match anything
+        // In that case we don't want to submit just yet, but we will delete the text
+        // so that typing enter multiple times does end up submitting
+        if (!$element.length) {
+            this.searchFilter = '';
+            return;
+        }
 
         // Ctrl + Enter submits the selection, just Enter completes the current entry
         if (e.metaKey || e.ctrlKey || $element.is('.selected')) {
