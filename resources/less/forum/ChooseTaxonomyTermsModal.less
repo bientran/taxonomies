@@ -51,6 +51,10 @@
     padding-bottom: 0;
     overflow: hidden;
     height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
 
     input {
         display: inline;
@@ -58,23 +62,18 @@
         margin-top: -2px;
         border: 0 !important;
         padding: 0;
-        width: 100%;
-        margin-right: -100%;
+        flex: 1;
         background: transparent !important;
     }
 }
 
 .TermsInput-term {
     cursor: not-allowed;
-}
+    padding-top: 6px;
+    margin-right: 5px;
 
-.TermsInput-selected {
-    .TermsInput-term {
-        margin-right: 5px;
-
-        &:last-child {
-            margin-right: 10px;
-        }
+    &:last-of-type {
+        margin-right: 10px;
     }
 }
 

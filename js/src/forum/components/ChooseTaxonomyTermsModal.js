@@ -221,14 +221,14 @@ export default class ChooseTaxonomyTermsModal extends Modal {
     inputItems() {
         const items = new ItemList();
 
-        items.add('selected', m('span.TermsInput-selected', this.selectedTerms.map(term => {
+        items.add('selected', this.selectedTerms.map(term => {
             return m('span.TermsInput-term', {
                 onclick: () => {
                     this.toggleTerm(term);
                     this.onready();
                 },
             }, termLabel(term));
-        })), 20);
+        }), 20);
 
         items.add('control', m('input.FormControl', {
             placeholder: extractText(this.getInstruction()),
@@ -295,7 +295,10 @@ export default class ChooseTaxonomyTermsModal extends Modal {
             this.activeListIndex = 0;
         }
 
-        this.onready();
+        // Defer re-focusing to next browser draw
+        setTimeout(() => {
+            this.onready();
+        });
     }
 
     select(e) {
