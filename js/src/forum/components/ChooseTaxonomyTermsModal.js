@@ -257,7 +257,9 @@ export default class ChooseTaxonomyTermsModal extends Modal {
     listAvailableTerms(terms) {
         return m('.Modal-footer', this.availableTerms === null ?
             LoadingIndicator.component() :
-            m('ul.ChooseTaxonomyTermsModal-list.SelectTermList', terms.map(this.listAvailableTerm.bind(this)))
+            m('ul.ChooseTaxonomyTermsModal-list.SelectTermList', {
+                className: terms.some(term => term.description()) ? 'SelectTermList--with-descriptions' : '',
+            }, terms.map(this.listAvailableTerm.bind(this)))
         );
     }
 

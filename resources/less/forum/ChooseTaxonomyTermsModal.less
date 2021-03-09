@@ -92,29 +92,7 @@
 .SelectTermListItem {
     padding: 7px 20px;
     overflow: hidden;
-    text-overflow: ellipsis;
     cursor: pointer;
-
-    &.pinned:not(.child) {
-        padding-top: 10px;
-        padding-bottom: 10px;
-
-        .SelectTermListItem-name {
-            font-size: 16px;
-        }
-    }
-
-    &.pinned + li:not(.pinned) {
-        border-top: 2px solid @control-bg;
-    }
-
-    &.child {
-        padding-left: 45px;
-
-        .SelectTermListItem-name {
-            width: 125px;
-        }
-    }
 
     &.active {
         background: @control-bg;
@@ -151,7 +129,6 @@
 
 .SelectTermListItem-name {
     display: inline-block;
-    width: 150px;
     margin-right: 10px;
     margin-left: 10px;
     white-space: nowrap;
@@ -161,6 +138,10 @@
 
     @media @phone {
         width: auto;
+    }
+
+    .SelectTermList--with-descriptions & {
+        width: 150px;
     }
 }
 
