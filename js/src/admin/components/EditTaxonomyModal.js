@@ -266,7 +266,9 @@ export default class EditTaxonomyModal extends AbstractEditModal {
         });
     }
 
-    onsubmit() {
+    onsubmit(event) {
+        event.preventDefault();
+
         this.loading = true;
 
         const record = this.props.taxonomy || app.store.createRecord('fof-taxonomies');

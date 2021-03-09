@@ -115,7 +115,9 @@ export default class EditTermModal extends AbstractEditModal {
         });
     }
 
-    onsubmit() {
+    onsubmit(event) {
+        event.preventDefault();
+
         this.loading = true;
 
         const record = this.props.term || app.store.createRecord('fof-taxonomy-terms');
