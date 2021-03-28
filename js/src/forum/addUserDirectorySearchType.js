@@ -23,6 +23,7 @@ export default function () {
             super();
 
             this.allTerms = null;
+            this.loadingAllTermsPromise = null;
         }
 
         resourceType() {
@@ -37,6 +38,8 @@ export default function () {
                 this.suggestions = [];
 
                 if (!query) {
+                    m.redraw();
+
                     return;
                 }
 
@@ -53,6 +56,10 @@ export default function () {
         }
 
         loadTerms() {
+            if (this.loadingAllTermsPromise) {
+                return this.loadingAllTermsPromise;
+            }
+
             if (this.allTerms !== null) {
                 return Promise.resolve(null);
             }
@@ -84,7 +91,11 @@ export default function () {
                 }));
             });
 
-            return Promise.all(promises);
+            this.loadingAllTermsPromise = Promise.all(promises);
+
+            return this.loadingAllTermsPromise.then(() => {
+                this.loadingAllTermsPromise = null;
+            });
         }
 
         renderKind(term) {
